@@ -4,7 +4,20 @@ A C#.NET command line tool to convert DELTARUNE Chapter 1 save files between PC 
 
 This program is a work in progress and may not work in all situations - this has only been tested converting 1 file from the Nintendo Switch version of DELTARUNE to the PC version and back.
 
+## Web Version
+
+A web-based version of this converter is now available! Access it by opening `web-converter.html` in your browser or visit the hosted version (if available). The web version offers:
+
+- 🌐 Works entirely in your browser - no installation needed
+- 📱 Compatible with all devices (PC, mobile, tablet)
+- 🔄 Same conversion functionality as the desktop version
+- 🎯 Drag & drop interface
+- 📊 Real-time conversion logs
+- 🔒 Privacy - all processing happens locally in your browser
+
 ## Usage
+
+### Desktop Version
 
 Requires [.NET 5.0 Runtime](https://dotnet.microsoft.com/download) (or later...?) installed.
 
@@ -42,6 +55,14 @@ DeltaruneSaveConverter ConvertFileFromConsole ./consolesave/filech1_0 ./pcsave/f
 DeltaruneSaveConverter ConvertFileFromPC ./pcsave/filech1_0 ./consolesave/filech1_0 
 - Converts the PC save file ./pcsave/filech1_0 into console format and saves it into /consolesave/filech1_0
 ```
+
+### Web Version
+
+1. Open `web-converter.html` in any modern web browser
+2. Drag and drop your save files onto the upload area
+3. Select conversion direction (Console → PC or PC → Console)
+4. Click "Convert Files"
+5. Download the converted files
 
 ## Compiling
 
