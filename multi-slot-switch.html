@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deltarune Switch Save Slot Merger</title>
+  <style>
+    body { background: #181818; color: #fff; font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    .container { max-width: 700px; margin: 40px auto; background: #232323; border-radius: 12px; box-shadow: 0 4px 24px #0008; padding: 32px; }
+    h1 { text-align: center; }
+    .upload-area { border: 2px dashed #444; border-radius: 8px; padding: 32px; text-align: center; margin-bottom: 24px; background: #222; }
+    .slot-list { margin: 24px 0; }
+    .slot-list label { display: block; margin: 8px 0; background: #292929; border-radius: 6px; padding: 10px; cursor: pointer; }
+    .slot-list input[type=radio] { margin-right: 10px; }
+    .slot-list .from { color: #aaa; font-size: 0.9em; }
+    button { background: #4caf50; color: #fff; border: none; border-radius: 6px; padding: 12px 32px; font-size: 1.1em; cursor: pointer; margin: 24px auto 0 auto; display: block; }
+    button:disabled { background: #555; cursor: not-allowed; }
+    .log { background: #111; border-radius: 6px; padding: 16px; margin-top: 24px; font-size: 0.95em; max-height: 200px; overflow-y: auto; }
+    .log-entry { margin: 4px 0; }
+    .success { color: #4caf50; }
+    .error { color: #ff6b6b; }
+    .warning { color: #ffb74d; }
+    .info { color: #64b5f6; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Deltarune Switch Save Slot Merger</h1>
+    <div class="upload-area">
+      <p>Upload up to <b>two</b> Switch .sav files.<br>Slots will be detected automatically.</p>
+      <input type="file" id="fileInput" multiple accept=".sav">
+      <button onclick="document.getElementById('fileInput').click()">Select .sav Files</button>
+    </div>
+    <div id="slotSelection" style="display:none">
+      <h3>Select which slot to use for each position:</h3>
+      <form id="slotForm"></form>
+      <button id="mergeBtn" disabled>Download merged .sav</button>
+    </div>
+    <div class="log" id="log"></div>
+  </div>
+  <script>
+    let uploadedSaves = [];
+    let slotMap = {};
+    let slotSources = {};
+    let mergedSlots = {};
+    let mergedDrIni = null;
+
+    function log(msg, type='info') {
+      const logDiv = document.getElementById('log');
+      const entry = document.createElement('div');
+      entry.className = 'log-entry ' + type;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      logDiv.appendChild(entry);
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    document.getElementById('fileInput').addEventListener('change', handleFiles);
+
+    function handleFiles(e) {
+      uploadedSaves = [];
+      slotMap = {};
+      slotSources = {};
+      mergedSlots = {};
+      mergedDrIni = null;
+      document.getElementById('slotSelection').style.display = 'none';
+      document.getElementById('slotForm').innerHTML = '';
+      document.getElementById('mergeBtn').disabled = true;
+      document.getElementById('log').innerHTML = '';
+
+      const files = Array.from(e.target.files);
+      if (files.length === 0) return;
+      if (files.length > 2) {
+        log('Please upload only up to two .sav files.', 'warning');
+        return;
+      }
+      let loaded = 0;
+      files.forEach((file, idx) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const content = ev.target.result.split('\0')[0];
+            const json = JSON.parse(content);
+            uploadedSaves.push({ name: file.name, slots: json, idx });
+            log(`Loaded ${file.name} with slots: ${Object.keys(json).filter(k=>k.startsWith('filech')).join(', ')}`);
+            loaded++;
+            if (loaded === files.length) {
+              showSlotSelection();
+            }
+          } catch (err) {
+            log(`Error reading ${file.name}: ${err.message}`, 'error');
+          }
+        };
+        reader.readAsText(file);
+      });
+    }
+
+    function showSlotSelection() {
+      // Find all unique slot names
+      let allSlots = new Set();
+      uploadedSaves.forEach(save => {
+        Object.keys(save.slots).forEach(k => {
+          if (k.startsWith('filech')) allSlots.add(k);
+        });
+      });
+      allSlots = Array.from(allSlots).sort();
+      // Map slot to source
+      slotMap = {};
+      slotSources = {};
+      // Build form
+      const form = document.getElementById('slotForm');
+      form.innerHTML = '';
+      allSlots.forEach(slot => {
+        // Find which saves have this slot
+        const options = uploadedSaves.map((save, idx) => {
+          if (save.slots[slot]) {
+            return `<label><input type="radio" name="${slot}" value="${idx}" required>From ${save.name}</label>`;
+          } else {
+            return `<label style="color:#555"><input type="radio" name="${slot}" value="none" disabled>Not in ${save.name}</label>`;
+          }
+        }).join('');
+        form.innerHTML += `<div class="slot-list"><b>${slot}</b><br>${options}</div>`;
+      });
+      // dr.ini merge (optional)
+      let drIniOptions = uploadedSaves.map((save, idx) => {
+        if (save.slots['dr.ini']) {
+          return `<label><input type="radio" name="drini" value="${idx}" required>From ${save.name}</label>`;
+        } else {
+          return `<label style="color:#555"><input type="radio" name="drini" value="none" disabled>Not in ${save.name}</label>`;
+        }
+      }).join('');
+      form.innerHTML += `<div class="slot-list"><b>dr.ini</b><br>${drIniOptions}</div>`;
+      document.getElementById('slotSelection').style.display = 'block';
+      document.getElementById('mergeBtn').disabled = false;
+    }
+
+    document.getElementById('mergeBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+      mergedSlots = {};
+      const form = document.getElementById('slotForm');
+      const data = new FormData(form);
+      // For each slot, get selected source
+      for (let [key, value] of data.entries()) {
+        if (key.startsWith('filech')) {
+          if (value !== 'none') {
+            mergedSlots[key] = uploadedSaves[parseInt(value)].slots[key];
+          }
+        } else if (key === 'drini' && value !== 'none') {
+          mergedDrIni = uploadedSaves[parseInt(value)].slots['dr.ini'];
+        }
+      }
+      if (mergedDrIni) mergedSlots['dr.ini'] = mergedDrIni;
+      // Always add "default"
+      mergedSlots['default'] = '';
+      // Download
+      const out = JSON.stringify(mergedSlots).replace(/\u0022/g, '\"');
+      const blob = new Blob([out], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'merged_switch_save.sav';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      log('Merged save file generated and downloaded!', 'success');
+    });
+  </script>
+</body>
+</html>
