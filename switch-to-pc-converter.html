@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deltarune Switch to PC Converter - Professional Edition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #7c3aed;
+            --primary-dark: #6d28d9;
+            --primary-light: #a78bfa;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --info: #3b82f6;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --gradient: linear-gradient(135deg, #7c3aed 0%, #3b82f6 100%);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Background animation */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+            background: 
+                radial-gradient(circle at 20% 50%, var(--primary) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, var(--info) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, var(--primary-light) 0%, transparent 50%);
+            animation: bgMove 20s ease infinite;
+        }
+
+        @keyframes bgMove {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(-20px, -20px) scale(1.1); }
+            66% { transform: translate(20px, -10px) scale(0.9); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(124, 58, 237, 0.5);
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border-color: var(--primary);
+        }
+
+        .upload-zone {
+            border: 3px dashed var(--border);
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            background: rgba(124, 58, 237, 0.05);
+        }
+
+        .upload-zone:hover {
+            border-color: var(--primary);
+            background: rgba(124, 58, 237, 0.1);
+        }
+
+        .upload-zone.drag-over {
+            border-color: var(--primary);
+            background: rgba(124, 58, 237, 0.2);
+            transform: scale(1.02);
+        }
+
+        .upload-zone.has-file {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(124, 58, 237, 0.4);
+        }
+
+        .btn:disabled {
+            background: var(--bg-hover);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: var(--bg-hover);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .file-info {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: var(--bg-hover);
+            border-radius: 8px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .file-info.show {
+            display: block;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: var(--primary-light);
+        }
+
+        .slots-preview {
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .slots-preview.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .slot-item {
+            background: var(--bg-hover);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .slot-item:hover {
+            border-color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .slot-item.completed {
+            border-left: 4px solid var(--success);
+        }
+
+        .slot-name {
+            font-weight: 600;
+            color: var(--primary-light);
+        }
+
+        .slot-details {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .slot-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-chapter1 {
+            background: rgba(124, 58, 237, 0.2);
+            color: var(--primary-light);
+        }
+
+        .badge-chapter2 {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+        }
+
+        .badge-complete {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .conversion-status {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            margin-bottom: 2rem;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .conversion-status.show {
+            display: block;
+        }
+
+        .status-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .status-icon {
+            font-size: 2rem;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .status-icon.success {
+            animation: none;
+            color: var(--success);
+        }
+
+        .status-icon.error {
+            animation: none;
+            color: var(--error);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-hover);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient);
+            width: 0%;
+            transition: width 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .log-container {
+            background: #0a0e1a;
+            border-radius: 8px;
+            padding: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            border: 1px solid var(--border);
+        }
+
+        .log-entry {
+            padding: 0.25rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .log-entry.info { color: var(--info); }
+        .log-entry.success { color: var(--success); }
+        .log-entry.warning { color: var(--warning); }
+        .log-entry.error { color: var(--error); }
+
+        .download-section {
+            text-align: center;
+            padding: 2rem;
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .download-section.show {
+            display: block;
+        }
+
+        .download-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .download-item {
+            background: var(--bg-hover);
+            padding: 1.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .download-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+        }
+
+        .download-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--bg-hover);
+            color: var(--text-primary);
+            text-align: center;
+            border-radius: 8px;
+            padding: 0.75rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: fadeInUp 0.3s ease;
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .close-modal {
+            float: right;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+
+        .close-modal:hover {
+            color: var(--text-primary);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-hover);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🎮 Deltarune Switch → PC Converter</h1>
+            <p>Convert your Nintendo Switch save files to PC format with ease</p>
+        </div>
+
+        <div class="main-content">
+            <div class="card">
+                <h2 style="margin-bottom: 1.5rem;">📥 Upload Switch Save</h2>
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-icon">📁</div>
+                    <h3 style="margin-bottom: 0.5rem;">Drop your .sav file here</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">or click to browse</p>
+                    <button class="btn btn-secondary">
+                        <span>📂</span> Select File
+                    </button>
+                    <input type="file" id="fileInput" class="file-input" accept=".sav">
+                </div>
+                
+                <div class="file-info" id="fileInfo">
+                    <div class="info-row">
+                        <span class="info-label">File Name:</span>
+                        <span class="info-value" id="fileName">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">File Size:</span>
+                        <span class="info-value" id="fileSize">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Total Slots:</span>
+                        <span class="info-value" id="totalSlots">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 style="margin-bottom: 1.5rem;">🎯 Detected Save Slots</h2>
+                <div class="slots-preview" id="slotsPreview">
+                    <p style="text-align: center; color: var(--text-secondary);">
+                        Upload a save file to see available slots
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="conversion-status" id="conversionStatus">
+            <div class="status-header">
+                <div class="status-icon" id="statusIcon">⚙️</div>
+                <div>
+                    <h3 id="statusTitle">Ready to Convert</h3>
+                    <p style="color: var(--text-secondary);" id="statusMessage">Click convert to begin the process</p>
+                </div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="log-container" id="logContainer"></div>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <button class="btn" id="convertBtn" disabled>
+                <span>🔄</span> Convert to PC Format
+            </button>
+        </div>
+
+        <div class="download-section" id="downloadSection">
+            <h2 style="margin-bottom: 0.5rem;">✅ Conversion Complete!</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Your files are ready to download</p>
+            <div class="download-grid" id="downloadGrid"></div>
+            <button class="btn" id="downloadAllBtn" style="margin-top: 1.5rem;">
+                <span>📦</span> Download All Files
+            </button>
+        </div>
+    </div>
+
+    <div class="modal" id="helpModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h2 style="margin-bottom: 1rem;">📖 How to Use</h2>
+            <ol style="line-height: 1.8;">
+                <li>Upload your Switch .sav file using the upload zone</li>
+                <li>The tool will automatically detect all save slots</li>
+                <li>Click "Convert to PC Format" to start the conversion</li>
+                <li>Download individual files or all files as a ZIP</li>
+                <li>Place the converted files in your PC Deltarune save folder</li>
+            </ol>
+            <h3 style="margin-top: 1.5rem; margin-bottom: 0.5rem;">💡 Tips:</h3>
+            <ul style="line-height: 1.8;">
+                <li>Make sure to backup your saves before converting</li>
+                <li>The tool preserves all game progress and data</li>
+                <li>Supports both Chapter 1 and Chapter 2 saves</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let uploadedFile = null;
+        let saveData = null;
+        let convertedFiles = {};
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+            log('Converter initialized and ready', 'info');
+        });
+
+        function setupEventListeners() {
+            const uploadZone = document.getElementById('uploadZone');
+            const fileInput = document.getElementById('fileInput');
+            const convertBtn = document.getElementById('convertBtn');
+            const downloadAllBtn = document.getElementById('downloadAllBtn');
+
+            // Upload zone click
+            uploadZone.addEventListener('click', () => fileInput.click());
+
+            // File input change
+            fileInput.addEventListener('change', handleFileSelect);
+
+            // Drag and drop
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('drag-over');
+            });
+
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.classList.remove('drag-over');
+            });
+
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('drag-over');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFile(files[0]);
+                }
+            });
+
+            // Convert button
+            convertBtn.addEventListener('click', startConversion);
+
+            // Download all button
+            downloadAllBtn.addEventListener('click', downloadAll);
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        async function handleFile(file) {
+            if (!file.name.endsWith('.sav')) {
+                log('Invalid file type. Please upload a .sav file', 'error');
+                return;
+            }
+
+            uploadedFile = file;
+            log(`Loading ${file.name}...`, 'info');
+
+            try {
+                const content = await readFile(file);
+                saveData = parseSaveFile(content);
+                
+                if (saveData) {
+                    displayFileInfo(file);
+                    displaySlots();
+                    document.getElementById('convertBtn').disabled = false;
+                    document.getElementById('uploadZone').classList.add('has-file');
+                    log('Save file loaded successfully', 'success');
+                } else {
+                    throw new Error('Invalid save file format');
+                }
+            } catch (error) {
+                log(`Error loading file: ${error.message}`, 'error');
+                resetUpload();
+            }
+        }
+
+        function readFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = reject;
+                reader.readAsText(file);
+            });
+        }
+
+        function parseSaveFile(content) {
+            try {
+                // Remove null terminator if present
+                const cleanContent = content.split('\0')[0];
+                const data = JSON.parse(cleanContent);
+                
+                // Extract slots
+                const slots = {};
+                Object.keys(data).forEach(key => {
+                    if (key.startsWith('filech1_') || key.startsWith('filech2_')) {
+                        slots[key] = data[key];
+                    }
+                });
+
+                // Include dr.ini if present
+                if (data['dr.ini']) {
+                    slots['dr.ini'] = data['dr.ini'];
+                }
+
+                return slots;
+            } catch (error) {
+                console.error('Parse error:', error);
+                return null;
+            }
+        }
+
+        function displayFileInfo(file) {
+            document.getElementById('fileInfo').classList.add('show');
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            document.getElementById('totalSlots').textContent = Object.keys(saveData).filter(k => k.startsWith('filech')).length;
+        }
+
+        function displaySlots() {
+            const preview = document.getElementById('slotsPreview');
+            preview.classList.add('show');
+            preview.innerHTML = '';
+
+            const slots = Object.keys(saveData).filter(k => k.startsWith('filech')).sort();
+            
+            slots.forEach(slot => {
+                const slotInfo = getSlotInfo(slot);
+                const slotElement = createSlotElement(slot, slotInfo);
+                preview.appendChild(slotElement);
+            });
+
+            if (saveData['dr.ini']) {
+                const drIniElement = document.createElement('div');
+                drIniElement.className = 'slot-item';
+                drIniElement.innerHTML = `
+                    <span class="slot-name">dr.ini</span>
+                    <div class="slot-details">
+                        <span class="slot-badge" style="background: rgba(139, 92, 246, 0.2); color: #a78bfa;">CONFIG</span>
+                    </div>
+                `;
+                preview.appendChild(drIniElement);
+            }
+        }
+
+        function getSlotInfo(slotName) {
+            const slotNum = parseInt(slotName.split('_')[1]);
+            const chapter = slotName.includes('ch1') ? 1 : 2;
+            const isCompleted = slotNum >= 3;
+            const displaySlot = isCompleted ? slotNum - 2 : slotNum + 1;
+            
+            // Try to extract character name from save data
+            let characterName = 'Unknown';
+            try {
+                const lines = saveData[slotName].split('\n');
+                if (lines.length > 0 && lines[0]) {
+                    characterName = lines[0];
+                }
+            } catch (e) {}
+
+            return {
+                chapter,
+                slotNumber: displaySlot,
+                isCompleted,
+                characterName
+            };
+        }
+
+        function createSlotElement(slotName, info) {
+            const element = document.createElement('div');
+            element.className = `slot-item ${info.isCompleted ? 'completed' : ''}`;
+            
+            element.innerHTML = `
+                <div>
+                    <span class="slot-name">${slotName}</span>
+                    <div style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                        ${info.characterName}
+                    </div>
+                </div>
+                <div class="slot-details">
+                    <span class="slot-badge badge-chapter${info.chapter}">Chapter ${info.chapter}</span>
+                    <span class="slot-badge">Slot ${info.slotNumber}</span>
+                    ${info.isCompleted ? '<span class="slot-badge badge-complete">Complete</span>' : ''}
+                </div>
+            `;
+            
+            return element;
+        }
+
+        async function startConversion() {
+            const status = document.getElementById('conversionStatus');
+            const statusIcon = document.getElementById('statusIcon');
+            const statusTitle = document.getElementById('statusTitle');
+            const statusMessage = document.getElementById('statusMessage');
+            const convertBtn = document.getElementById('convertBtn');
+            
+            status.classList.add('show');
+            convertBtn.disabled = true;
+            convertedFiles = {};
+            
+            statusIcon.className = 'status-icon';
+            statusIcon.textContent = '⚙️';
+            statusTitle.textContent = 'Converting...';
+            statusMessage.textContent = 'Processing save files';
+            
+            clearLog();
+            log('Starting conversion process...', 'info');
+            
+            try {
+                const totalSlots = Object.keys(saveData).filter(k => k.startsWith('filech')).length;
+                let processed = 0;
+                
+                for (const [slotName, slotData] of Object.entries(saveData)) {
+                    if (slotName.startsWith('filech')) {
+                        log(`Converting ${slotName}...`, 'info');
+                        
+                        // Convert based on chapter
+                        if (slotName.includes('ch1')) {
+                            convertedFiles[slotName] = convertChapter1Slot(slotData);
+                        } else if (slotName.includes('ch2')) {
+                            convertedFiles[slotName] = convertChapter2Slot(slotData);
+                        }
+                        
+                        processed++;
+                        updateProgress((processed / totalSlots) * 100);
+                        log(`✓ ${slotName} converted successfully`, 'success');
+                        
+                        // Small delay for visual effect
+                        await new Promise(resolve => setTimeout(resolve, 200));
+                    }
+                }
+                
+                // Handle dr.ini if present
+                if (saveData['dr.ini']) {
+                    log('Processing dr.ini...', 'info');
+                    convertedFiles['dr.ini'] = saveData['dr.ini'];
+                    log('✓ dr.ini processed', 'success');
+                }
+                
+                updateProgress(100);
+                
+                statusIcon.className = 'status-icon success';
+                statusIcon.textContent = '✅';
+                statusTitle.textContent = 'Conversion Complete!';
+                statusMessage.textContent = `Successfully converted ${Object.keys(convertedFiles).length} files`;
+                
+                log(`Conversion completed! ${Object.keys(convertedFiles).length} files ready`, 'success');
+                
+                displayDownloads();
+                
+            } catch (error) {
+                statusIcon.className = 'status-icon error';
+                statusIcon.textContent = '❌';
+                statusTitle.textContent = 'Conversion Failed';
+                statusMessage.textContent = error.message;
+                log(`Conversion error: ${error.message}`, 'error');
+                convertBtn.disabled = false;
+            }
+        }
+
+        function convertChapter1Slot(consoleData) {
+            // Parse console format
+            const lines = consoleData.split('\n');
+            const pcLines = [];
+            let lineIndex = 0;
+
+            // Character name
+            pcLines.push(lines[lineIndex++]);
+
+            // Other names (6 entries) - decode from GMS list format
+            const otherNamesEncoded = lines[lineIndex++];
+            const otherNames = decodeGMSList(otherNamesEncoded, 'string');
+            otherNames.forEach(name => pcLines.push(name));
+
+            // Character array (3 values)
+            for (let i = 0; i < 3; i++) {
+                pcLines.push(lines[lineIndex++]);
+            }
+
+            // Basic stats
+            pcLines.push(lines[lineIndex++]); // gold
+            pcLines.push(lines[lineIndex++]); // xp
+            pcLines.push(lines[lineIndex++]); // lv
+            pcLines.push(lines[lineIndex++]); // inv
+            pcLines.push(lines[lineIndex++]); // invc
+            pcLines.push(lines[lineIndex++]); // darkzone
+
+            // Arrays that need to be decoded and expanded
+            const hp = decodeGMSList(lines[lineIndex++], 'real');
+            const maxhp = decodeGMSList(lines[lineIndex++], 'real');
+            const at = decodeGMSList(lines[lineIndex++], 'real');
+            const df = decodeGMSList(lines[lineIndex++], 'real');
+            const mag = decodeGMSList(lines[lineIndex++], 'real');
+            const guts = decodeGMSList(lines[lineIndex++], 'real');
+            const charweapon = decodeGMSList(lines[lineIndex++], 'real');
+            const chararmor1 = decodeGMSList(lines[lineIndex++], 'real');
+            const chararmor2 = decodeGMSList(lines[lineIndex++], 'real');
+            const weaponstyle = decodeGMSList(lines[lineIndex++], 'string');
+
+            // Expand character stats (4 characters)
+            for (let i = 0; i < 4; i++) {
+                pcLines.push(hp[i] || '0');
+                pcLines.push(maxhp[i] || '0');
+                pcLines.push(at[i] || '0');
+                pcLines.push(df[i] || '0');
+                pcLines.push(mag[i] || '0');
+                pcLines.push(guts[i] || '0');
+                pcLines.push(charweapon[i] || '0');
+                pcLines.push(chararmor1[i] || '0');
+                pcLines.push(chararmor2[i] || '0');
+                pcLines.push(weaponstyle[i] || '');
+
+                // Item stats (4x8 values per character)
+                for (let q = 0; q < 4; q++) {
+                    for (let stat = 0; stat < 8; stat++) {
+                        pcLines.push(lines[lineIndex++]);
+                    }
+                }
+
+                // Spells (12 per character)
+                for (let j = 0; j < 12; j++) {
+                    pcLines.push(lines[lineIndex++]);
+                }
+            }
+
+            // Bolt stats
+            pcLines.push(lines[lineIndex++]); // boltspeed
+            pcLines.push(lines[lineIndex++]); // grazeamt
+            pcLines.push(lines[lineIndex++]); // grazesize
+
+            // Inventory arrays
+            const items = decodeGMSList(lines[lineIndex++], 'real');
+            const keyitems = decodeGMSList(lines[lineIndex++], 'real');
+            const weapons = decodeGMSList(lines[lineIndex++], 'real');
+            const armors = decodeGMSList(lines[lineIndex++], 'real');
+
+            // Expand inventory (13 slots each)
+            for (let i = 0; i < 13; i++) {
+                pcLines.push(items[i] || '0');
+                pcLines.push(keyitems[i] || '0');
+                pcLines.push(weapons[i] || '0');
+                pcLines.push(armors[i] || '0');
+            }
+
+            // Tension
+            pcLines.push(lines[lineIndex++]); // tension
+            pcLines.push(lines[lineIndex++]); // maxtension
+
+            // Light world stats
+            pcLines.push(lines[lineIndex++]); // lweapon
+            pcLines.push(lines[lineIndex++]); // larmor
+            pcLines.push(lines[lineIndex++]); // lxp
+            pcLines.push(lines[lineIndex++]); // llv
+            pcLines.push(lines[lineIndex++]); // lgold
+            pcLines.push(lines[lineIndex++]); // lhp
+            pcLines.push(lines[lineIndex++]); // lmaxhp
+            pcLines.push(lines[lineIndex++]); // lat
+            pcLines.push(lines[lineIndex++]); // ldf
+            pcLines.push(lines[lineIndex++]); // lwstrength
+            pcLines.push(lines[lineIndex++]); // ladef
+
+            // Light world items and phone
+            const litems = decodeGMSList(lines[lineIndex++], 'real');
+            const phone = decodeGMSList(lines[lineIndex++], 'real');
+
+            for (let i = 0; i < 8; i++) {
+                pcLines.push(litems[i] || '0');
+                pcLines.push(phone[i] || '0');
+            }
+
+            // Flags (9999 values)
+            const flags = decodeGMSList(lines[lineIndex++], 'real');
+            for (let i = 0; i < 9999; i++) {
+                pcLines.push(flags[i] || '0');
+            }
+
+            // Final values
+            pcLines.push(lines[lineIndex++]); // plot
+            pcLines.push(lines[lineIndex++]); // currentroom
+            pcLines.push(lines[lineIndex++]); // time
+
+            return pcLines.join('\r\n');
+        }
+
+        function convertChapter2Slot(consoleData) {
+            // Similar to Chapter 1 but with more data
+            const lines = consoleData.split('\n');
+            const pcLines = [];
+            let lineIndex = 0;
+
+            // Character name
+            pcLines.push(lines[lineIndex++]);
+
+            // Other names (7 entries for Ch2)
+            const otherNamesEncoded = lines[lineIndex++];
+            const otherNames = decodeGMSList(otherNamesEncoded, 'string');
+            for (let i = 0; i < 7; i++) {
+                pcLines.push(otherNames[i] || '');
+            }
+
+            // Character array (3 values)
+            for (let i = 0; i < 3; i++) {
+                pcLines.push(lines[lineIndex++]);
+            }
+
+            // Basic stats
+            pcLines.push(lines[lineIndex++]); // gold
+            pcLines.push(lines[lineIndex++]); // xp
+            pcLines.push(lines[lineIndex++]); // lv
+            pcLines.push(lines[lineIndex++]); // inv
+            pcLines.push(lines[lineIndex++]); // invc
+            pcLines.push(lines[lineIndex++]); // darkzone
+
+            // Arrays that need to be decoded and expanded
+            const hp = decodeGMSList(lines[lineIndex++], 'real');
+            const maxhp = decodeGMSList(lines[lineIndex++], 'real');
+            const at = decodeGMSList(lines[lineIndex++], 'real');
+            const df = decodeGMSList(lines[lineIndex++], 'real');
+            const mag = decodeGMSList(lines[lineIndex++], 'real');
+            const guts = decodeGMSList(lines[lineIndex++], 'real');
+            const charweapon = decodeGMSList(lines[lineIndex++], 'real');
+            const chararmor1 = decodeGMSList(lines[lineIndex++], 'real');
+            const chararmor2 = decodeGMSList(lines[lineIndex++], 'real');
+            const weaponstyle = decodeGMSList(lines[lineIndex++], 'string');
+
+            // Expand character stats (4 characters)
+            for (let i = 0; i < 4; i++) {
+                pcLines.push(hp[i] || '0');
+                pcLines.push(maxhp[i] || '0');
+                pcLines.push(at[i] || '0');
+                pcLines.push(df[i] || '0');
+                pcLines.push(mag[i] || '0');
+                pcLines.push(guts[i] || '0');
+                pcLines.push(charweapon[i] || '0');
+                pcLines.push(chararmor1[i] || '0');
+                pcLines.push(chararmor2[i] || '0');
+                pcLines.push(weaponstyle[i] || '');
+
+                // Item stats (4x8 values per character)
+                for (let q = 0; q < 4; q++) {
+                    for (let stat = 0; stat < 8; stat++) {
+                        pcLines.push(lines[lineIndex++]);
+                    }
+                }
+
+                // Spells (12 per character)
+                for (let j = 0; j < 12; j++) {
+                    pcLines.push(lines[lineIndex++]);
+                }
+            }
+
+            // Bolt stats
+            pcLines.push(lines[lineIndex++]); // boltspeed
+            pcLines.push(lines[lineIndex++]); // grazeamt
+            pcLines.push(lines[lineIndex++]); // grazesize
+
+            // Inventory arrays (48 slots in Ch2)
+            const items = decodeGMSList(lines[lineIndex++], 'real');
+            const keyitems = decodeGMSList(lines[lineIndex++], 'real');
+            const weapons = decodeGMSList(lines[lineIndex++], 'real');
+            const armors = decodeGMSList(lines[lineIndex++], 'real');
+
+            // Expand inventory (48 slots each for Ch2)
+            for (let i = 0; i < 48; i++) {
+                pcLines.push(items[i] || '0');
+                pcLines.push(keyitems[i] || '0');
+                pcLines.push(weapons[i] || '0');
+                pcLines.push(armors[i] || '0');
+            }
+
+            // Tension
+            pcLines.push(lines[lineIndex++]); // tension
+            pcLines.push(lines[lineIndex++]); // maxtension
+
+            // Light world stats
+            pcLines.push(lines[lineIndex++]); // lweapon
+            pcLines.push(lines[lineIndex++]); // larmor
+            pcLines.push(lines[lineIndex++]); // lxp
+            pcLines.push(lines[lineIndex++]); // llv
+            pcLines.push(lines[lineIndex++]); // lgold
+            pcLines.push(lines[lineIndex++]); // lhp
+            pcLines.push(lines[lineIndex++]); // lmaxhp
+            pcLines.push(lines[lineIndex++]); // lat
+            pcLines.push(lines[lineIndex++]); // ldf
+            pcLines.push(lines[lineIndex++]); // lwstrength
+            pcLines.push(lines[lineIndex++]); // ladef
+
+            // Light world items and phone
+            const litems = decodeGMSList(lines[lineIndex++], 'real');
+            const phone = decodeGMSList(lines[lineIndex++], 'real');
+
+            for (let i = 0; i < 8; i++) {
+                pcLines.push(litems[i] || '0');
+                pcLines.push(phone[i] || '0');
+            }
+
+            // Flags (9999 values)
+            const flags = decodeGMSList(lines[lineIndex++], 'real');
+            for (let i = 0; i < 9999; i++) {
+                pcLines.push(flags[i] || '0');
+            }
+
+            // Final values
+            pcLines.push(lines[lineIndex++]); // plot
+            pcLines.push(lines[lineIndex++]); // currentroom
+            pcLines.push(lines[lineIndex++]); // time
+
+            return pcLines.join('\r\n');
+        }
+
+        function decodeGMSList(encoded, type) {
+            if (!encoded || encoded === '') return [];
+            
+            try {
+                // GMS list format: [ "item1", "item2", ... ]
+                // Remove the brackets and quotes, then split
+                const cleaned = encoded.replace(/^\[|\]$/g, '').trim();
+                
+                if (cleaned === '') return [];
+                
+                if (type === 'string') {
+                    // Handle string lists with proper quote parsing
+                    const items = [];
+                    let current = '';
+                    let inQuotes = false;
+                    
+                    for (let i = 0; i < cleaned.length; i++) {
+                        const char = cleaned[i];
+                        
+                        if (char === '"' && (i === 0 || cleaned[i-1] !== '\\')) {
+                            inQuotes = !inQuotes;
+                        } else if (char === ',' && !inQuotes) {
+                            items.push(current.trim().replace(/^"|"$/g, ''));
+                            current = '';
+                        } else {
+                            current += char;
+                        }
+                    }
+                    
+                    if (current) {
+                        items.push(current.trim().replace(/^"|"$/g, ''));
+                    }
+                    
+                    return items;
+                } else {
+                    // Handle numeric lists
+                    return cleaned.split(',').map(item => item.trim());
+                }
+            } catch (error) {
+                console.error('Error decoding GMS list:', error);
+                return [];
+            }
+        }
+
+        function displayDownloads() {
+            const section = document.getElementById('downloadSection');
+            const grid = document.getElementById('downloadGrid');
+            
+            section.classList.add('show');
+            grid.innerHTML = '';
+            
+            Object.keys(convertedFiles).forEach(fileName => {
+                const item = document.createElement('div');
+                item.className = 'download-item';
+                item.onclick = () => downloadFile(fileName);
+                
+                const info = getSlotInfo(fileName);
+                const icon = fileName === 'dr.ini' ? '⚙️' : '📄';
+                
+                item.innerHTML = `
+                    <div class="download-icon">${icon}</div>
+                    <div style="font-weight: 600;">${fileName}</div>
+                    <div style="font-size: 0.9rem; color: var(--text-secondary);">
+                        ${fileName === 'dr.ini' ? 'Configuration' : `Chapter ${info.chapter} - Slot ${info.slotNumber}`}
+                    </div>
+                `;
+                
+                grid.appendChild(item);
+            });
+        }
+
+        function downloadFile(fileName) {
+            const content = convertedFiles[fileName];
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            log(`Downloaded ${fileName}`, 'success');
+        }
+
+        function downloadAll() {
+            // For simplicity, download each file individually
+            // In a real implementation, you might want to create a ZIP file
+            Object.keys(convertedFiles).forEach(fileName => {
+                downloadFile(fileName);
+            });
+            
+            log('All files downloaded', 'success');
+        }
+
+        function updateProgress(percent) {
+            document.getElementById('progressFill').style.width = `${percent}%`;
+        }
+
+        function log(message, type = 'info') {
+            const container = document.getElementById('logContainer');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            entry.innerHTML = `<span style="opacity: 0.7;">[${timestamp}]</span> ${message}`;
+            
+            container.appendChild(entry);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('logContainer').innerHTML = '';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function resetUpload() {
+            uploadedFile = null;
+            saveData = null;
+            convertedFiles = {};
+            document.getElementById('fileInfo').classList.remove('show');
+            document.getElementById('slotsPreview').classList.remove('show');
+            document.getElementById('conversionStatus').classList.remove('show');
+            document.getElementById('downloadSection').classList.remove('show');
+            document.getElementById('uploadZone').classList.remove('has-file');
+            document.getElementById('convertBtn').disabled = true;
+            document.getElementById('fileInput').value = '';
+        }
+
+        function closeModal() {
+            document.getElementById('helpModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('helpModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Add help button functionality
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'F1') {
+                e.preventDefault();
+                document.getElementById('helpModal').style.display = 'flex';
+            }
+        });
+    </script>
+</body>
+</html>
