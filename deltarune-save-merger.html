@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deltarune Switch Save Merger - Professional Edition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .upload-section {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .upload-area.drag-over {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn:disabled {
+            background: var(--bg-hover);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: var(--bg-hover);
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .saves-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .save-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .save-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .save-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .save-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .save-stats {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            font-weight: 600;
+        }
+
+        .slots-section {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+        }
+
+        .slot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .slot-card {
+            background: var(--bg-hover);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .slot-card.selected {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .slot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .slot-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .slot-type {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            background: var(--bg-dark);
+            color: var(--text-secondary);
+        }
+
+        .slot-type.completed {
+            background: var(--success);
+            color: white;
+        }
+
+        .slot-info {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .slot-source-select {
+            width: 100%;
+            padding: 0.5rem;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .merge-section {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .merge-options {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .option-card {
+            background: var(--bg-hover);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option-card:hover {
+            border-color: var(--primary);
+        }
+
+        .option-card.selected {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .log-section {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border: 1px solid var(--border);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            padding: 0.5rem;
+            margin-bottom: 0.25rem;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+        }
+
+        .log-entry.info {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .log-entry.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .log-entry.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .log-entry.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+
+        .preview-section {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .preview-slot {
+            background: var(--bg-hover);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid var(--border);
+        }
+
+        .preview-slot.filled {
+            border-color: var(--primary);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close-modal {
+            float: right;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .close-modal:hover {
+            color: var(--text-primary);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--bg-hover);
+            color: var(--text-primary);
+            text-align: center;
+            border-radius: 6px;
+            padding: 0.5rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8rem;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--bg-hover);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 Deltarune Switch Save Merger</h1>
+            <p>Professional tool to merge save slots from multiple .sav files</p>
+        </div>
+
+        <div class="upload-section">
+            <h2 style="margin-bottom: 1rem;">📁 Upload Save Files</h2>
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📤</div>
+                <p style="font-size: 1.2rem; margin-bottom: 0.5rem;">Drop .sav files here or click to browse</p>
+                <p style="color: var(--text-secondary);">You can upload multiple Switch save files</p>
+                <input type="file" id="fileInput" class="file-input" multiple accept=".sav">
+            </div>
+            <div class="progress-bar" id="progressBar" style="display: none;">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <div id="savesGrid" class="saves-grid" style="display: none;"></div>
+
+        <div id="slotsSection" class="slots-section" style="display: none;">
+            <h2 style="margin-bottom: 0.5rem;">🎯 Select Slots to Merge</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">Choose which save file to use for each slot</p>
+            <div id="slotGrid" class="slot-grid"></div>
+        </div>
+
+        <div id="previewSection" class="preview-section" style="display: none;">
+            <h2 style="margin-bottom: 0.5rem;">👁️ Preview Final Save</h2>
+            <p style="color: var(--text-secondary);">This is how your merged save will look</p>
+            <div class="preview-grid" id="previewGrid"></div>
+        </div>
+
+        <div id="mergeSection" class="merge-section" style="display: none;">
+            <h2 style="margin-bottom: 1rem;">⚙️ Merge Options</h2>
+            <div class="merge-options">
+                <div class="option-card" data-option="keepNewest">
+                    <h3>🕐 Keep Newest</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary);">Use most recent save data</p>
+                </div>
+                <div class="option-card" data-option="keepOldest">
+                    <h3>📅 Keep Oldest</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary);">Use original save data</p>
+                </div>
+                <div class="option-card selected" data-option="manual">
+                    <h3>✋ Manual Selection</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary);">Choose each slot manually</p>
+                </div>
+            </div>
+            <button class="btn" id="mergeBtn" style="font-size: 1.1rem; padding: 1rem 3rem;">
+                <span>🔀</span> Merge and Download
+            </button>
+        </div>
+
+        <div class="log-section" id="logSection">
+            <h3 style="margin-bottom: 1rem;">📋 Activity Log</h3>
+            <div id="logContent"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="detailsModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle">Save Details</h2>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let uploadedSaves = [];
+        let selectedSlots = {};
+        let mergeOption = 'manual';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+            log('Application ready. Upload your .sav files to begin.', 'info');
+        });
+
+        function setupEventListeners() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+
+            uploadArea.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', handleFileSelect);
+
+            // Drag and drop
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('drag-over');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('drag-over');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('drag-over');
+                handleFiles(e.dataTransfer.files);
+            });
+
+            // Merge options
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    mergeOption = card.dataset.option;
+                    updateSlotSelection();
+                });
+            });
+
+            // Merge button
+            document.getElementById('mergeBtn').addEventListener('click', performMerge);
+        }
+
+        function handleFileSelect(e) {
+            handleFiles(e.target.files);
+        }
+
+        async function handleFiles(files) {
+            const savFiles = Array.from(files).filter(f => f.name.endsWith('.sav'));
+            
+            if (savFiles.length === 0) {
+                log('No valid .sav files found', 'error');
+                return;
+            }
+
+            showProgress();
+            uploadedSaves = [];
+
+            for (let i = 0; i < savFiles.length; i++) {
+                const file = savFiles[i];
+                updateProgress((i + 1) / savFiles.length * 100);
+                
+                try {
+                    const content = await readFile(file);
+                    const saveData = parseSaveFile(content, file.name);
+                    
+                    if (saveData) {
+                        uploadedSaves.push(saveData);
+                        log(`Loaded ${file.name} successfully`, 'success');
+                    }
+                } catch (error) {
+                    log(`Error loading ${file.name}: ${error.message}`, 'error');
+                }
+            }
+
+            hideProgress();
+            
+            if (uploadedSaves.length > 0) {
+                displaySaves();
+                displaySlots();
+                updatePreview();
+            }
+        }
+
+        function readFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = reject;
+                reader.readAsText(file);
+            });
+        }
+
+        function parseSaveFile(content, filename) {
+            try {
+                // Remove null terminator if present
+                const cleanContent = content.split('\0')[0];
+                const data = JSON.parse(cleanContent);
+                
+                // Extract save information
+                const saveInfo = {
+                    filename: filename,
+                    data: data,
+                    slots: {},
+                    stats: {}
+                };
+
+                // Find all slots
+                Object.keys(data).forEach(key => {
+                    if (key.startsWith('filech1_') || key.startsWith('filech2_')) {
+                        const slotData = parseSlotData(data[key], key);
+                        saveInfo.slots[key] = slotData;
+                        
+                        // Extract stats for display
+                        if (!saveInfo.stats[key]) {
+                            saveInfo.stats[key] = extractStats(slotData, key);
+                        }
+                    }
+                });
+
+                // Check for dr.ini
+                if (data['dr.ini']) {
+                    saveInfo.drIni = data['dr.ini'];
+                }
+
+                return saveInfo;
+            } catch (error) {
+                console.error('Parse error:', error);
+                return null;
+            }
+        }
+
+        function parseSlotData(slotContent, slotName) {
+            // For console format, the data is already in the correct format
+            // Just return it as is
+            return slotContent;
+        }
+
+        function extractStats(slotData, slotName) {
+            const stats = {
+                name: 'Unknown',
+                level: 0,
+                playtime: 0,
+                room: 0,
+                chapter: slotName.includes('ch1') ? 1 : 2,
+                isCompleted: parseInt(slotName.split('_')[1]) >= 3
+            };
+
+            try {
+                if (typeof slotData === 'string') {
+                    const lines = slotData.split('\n');
+                    if (lines.length > 0) {
+                        stats.name = lines[0] || 'Unknown';
+                        // Parse other stats based on known line positions
+                        if (lines.length > 10) {
+                            stats.level = parseInt(lines[12]) || 0;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error extracting stats:', error);
+            }
+
+            return stats;
+        }
+
+        function displaySaves() {
+            const grid = document.getElementById('savesGrid');
+            grid.innerHTML = '';
+            grid.style.display = 'grid';
+
+            uploadedSaves.forEach((save, index) => {
+                const card = createSaveCard(save, index);
+                grid.appendChild(card);
+            });
+        }
+
+        function createSaveCard(save, index) {
+            const card = document.createElement('div');
+            card.className = 'save-card';
+            
+            const slotCount = Object.keys(save.slots).length;
+            const chapters = [...new Set(Object.keys(save.slots).map(s => s.includes('ch1') ? 1 : 2))];
+            
+            card.innerHTML = `
+                <div class="save-header">
+                    <div class="save-title">${save.filename}</div>
+                    <button class="btn btn-secondary" onclick="showSaveDetails(${index})">
+                        <span>📊</span> Details
+                    </button>
+                </div>
+                <div class="save-stats">
+                    <div class="stat-row">
+                        <span class="stat-label">Total Slots:</span>
+                        <span class="stat-value">${slotCount}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Chapters:</span>
+                        <span class="stat-value">${chapters.join(', ')}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Has dr.ini:</span>
+                        <span class="stat-value">${save.drIni ? 'Yes' : 'No'}</span>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        function displaySlots() {
+            const section = document.getElementById('slotsSection');
+            const grid = document.getElementById('slotGrid');
+            
+            section.style.display = 'block';
+            grid.innerHTML = '';
+
+            // Get all unique slots across all saves
+            const allSlots = new Set();
+            uploadedSaves.forEach(save => {
+                Object.keys(save.slots).forEach(slot => allSlots.add(slot));
+            });
+
+            // Sort slots
+            const sortedSlots = Array.from(allSlots).sort((a, b) => {
+                // Sort by chapter then by slot number
+                const aChapter = a.includes('ch1') ? 1 : 2;
+                const bChapter = b.includes('ch1') ? 1 : 2;
+                if (aChapter !== bChapter) return aChapter - bChapter;
+                
+                const aNum = parseInt(a.split('_')[1]);
+                const bNum = parseInt(b.split('_')[1]);
+                return aNum - bNum;
+            });
+
+            // Create slot cards
+            sortedSlots.forEach(slot => {
+                const card = createSlotCard(slot);
+                grid.appendChild(card);
+            });
+
+            // Add dr.ini if present
+            if (uploadedSaves.some(s => s.drIni)) {
+                const drIniCard = createDrIniCard();
+                grid.appendChild(drIniCard);
+            }
+        }
+
+        function createSlotCard(slotName) {
+            const card = document.createElement('div');
+            card.className = 'slot-card';
+            
+            const slotNum = parseInt(slotName.split('_')[1]);
+            const chapter = slotName.includes('ch1') ? 1 : 2;
+            const isCompleted = slotNum >= 3;
+            const displaySlot = isCompleted ? slotNum - 2 : slotNum + 1;
+            
+            let slotInfo = `Chapter ${chapter} - Slot ${displaySlot}`;
+            if (isCompleted) slotInfo += ' (Completed)';
+
+            card.innerHTML = `
+                <div class="slot-header">
+                    <div class="slot-name">${slotName}</div>
+                    <div class="slot-type ${isCompleted ? 'completed' : ''}">${isCompleted ? 'COMPLETE' : 'ACTIVE'}</div>
+                </div>
+                <div class="slot-info">${slotInfo}</div>
+                <select class="slot-source-select" id="select-${slotName}" onchange="updateSlotSource('${slotName}', this.value)">
+                    <option value="">-- Select Source --</option>
+                    ${getSlotSourceOptions(slotName)}
+                </select>
+            `;
+
+            return card;
+        }
+
+        function createDrIniCard() {
+            const card = document.createElement('div');
+            card.className = 'slot-card';
+            
+            card.innerHTML = `
+                <div class="slot-header">
+                    <div class="slot-name">dr.ini</div>
+                    <div class="slot-type">CONFIG</div>
+                </div>
+                <div class="slot-info">Game configuration file</div>
+                <select class="slot-source-select" id="select-dr.ini" onchange="updateSlotSource('dr.ini', this.value)">
+                    <option value="">-- Select Source --</option>
+                    ${getDrIniSourceOptions()}
+                </select>
+            `;
+
+            return card;
+        }
+
+        function getSlotSourceOptions(slotName) {
+            let options = '';
+            uploadedSaves.forEach((save, index) => {
+                if (save.slots[slotName]) {
+                    const stats = save.stats[slotName];
+                    const label = `${save.filename} (${stats.name || 'Unknown'})`;
+                    options += `<option value="${index}">${label}</option>`;
+                }
+            });
+            return options;
+        }
+
+        function getDrIniSourceOptions() {
+            let options = '';
+            uploadedSaves.forEach((save, index) => {
+                if (save.drIni) {
+                    options += `<option value="${index}">${save.filename}</option>`;
+                }
+            });
+            return options;
+        }
+
+        function updateSlotSource(slotName, sourceIndex) {
+            if (sourceIndex === '') {
+                delete selectedSlots[slotName];
+            } else {
+                selectedSlots[slotName] = parseInt(sourceIndex);
+            }
+            
+            updatePreview();
+            updateSlotCard(slotName, sourceIndex !== '');
+        }
+
+        function updateSlotCard(slotName, isSelected) {
+            const card = document.getElementById(`select-${slotName}`).closest('.slot-card');
+            if (isSelected) {
+                card.classList.add('selected');
+            } else {
+                card.classList.remove('selected');
+            }
+        }
+
+        function updateSlotSelection() {
+            if (mergeOption === 'manual') return;
+
+            // Auto-select based on merge option
+            const allSlots = new Set();
+            uploadedSaves.forEach(save => {
+                Object.keys(save.slots).forEach(slot => allSlots.add(slot));
+            });
+
+            allSlots.forEach(slot => {
+                const sources = [];
+                uploadedSaves.forEach((save, index) => {
+                    if (save.slots[slot]) {
+                        sources.push({ index, save });
+                    }
+                });
+
+                if (sources.length > 0) {
+                    let selectedIndex;
+                    if (mergeOption === 'keepNewest') {
+                        // For now, just use the last uploaded file
+                        selectedIndex = sources[sources.length - 1].index;
+                    } else if (mergeOption === 'keepOldest') {
+                        // Use the first uploaded file
+                        selectedIndex = sources[0].index;
+                    }
+
+                    const selectElement = document.getElementById(`select-${slot}`);
+                    if (selectElement) {
+                        selectElement.value = selectedIndex.toString();
+                        updateSlotSource(slot, selectedIndex.toString());
+                    }
+                }
+            });
+        }
+
+        function updatePreview() {
+            const section = document.getElementById('previewSection');
+            const grid = document.getElementById('previewGrid');
+            
+            if (Object.keys(selectedSlots).length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+
+            section.style.display = 'block';
+            grid.innerHTML = '';
+
+            // Show preview for slots 1-3
+            for (let i = 0; i < 3; i++) {
+                const ch1Slot = `filech1_${i}`;
+                const ch2Slot = `filech2_${i}`;
+                
+                const previewSlot = document.createElement('div');
+                previewSlot.className = 'preview-slot';
+                
+                let content = `<h4>Slot ${i + 1}</h4>`;
+                
+                if (selectedSlots[ch1Slot] !== undefined) {
+                    const source = uploadedSaves[selectedSlots[ch1Slot]];
+                    const stats = source.stats[ch1Slot];
+                    content += `<p>Ch1: ${stats.name}</p>`;
+                    previewSlot.classList.add('filled');
+                } else {
+                    content += `<p style="color: var(--text-secondary)">Ch1: Empty</p>`;
+                }
+                
+                if (selectedSlots[ch2Slot] !== undefined) {
+                    const source = uploadedSaves[selectedSlots[ch2Slot]];
+                    const stats = source.stats[ch2Slot];
+                    content += `<p>Ch2: ${stats.name}</p>`;
+                    previewSlot.classList.add('filled');
+                } else {
+                    content += `<p style="color: var(--text-secondary)">Ch2: Empty</p>`;
+                }
+                
+                previewSlot.innerHTML = content;
+                grid.appendChild(previewSlot);
+            }
+
+            // Enable merge button if at least one slot is selected
+            document.getElementById('mergeSection').style.display = 'block';
+            document.getElementById('mergeBtn').disabled = Object.keys(selectedSlots).length === 0;
+        }
+
+        function performMerge() {
+            if (Object.keys(selectedSlots).length === 0) {
+                log('No slots selected for merging', 'error');
+                return;
+            }
+
+            log('Starting merge process...', 'info');
+
+            try {
+                // Create merged save object
+                const mergedSave = {
+                    default: ''
+                };
+
+                // Add selected slots
+                Object.entries(selectedSlots).forEach(([slotName, sourceIndex]) => {
+                    const source = uploadedSaves[sourceIndex];
+                    
+                    if (slotName === 'dr.ini') {
+                        mergedSave['dr.ini'] = source.drIni;
+                        log(`Added dr.ini from ${source.filename}`, 'success');
+                    } else {
+                        mergedSave[slotName] = source.slots[slotName];
+                        const stats = source.stats[slotName];
+                        log(`Added ${slotName} (${stats.name}) from ${source.filename}`, 'success');
+                    }
+                });
+
+                // Convert to JSON string
+                const saveContent = JSON.stringify(mergedSave);
+                
+                // Create and download file
+                const blob = new Blob([saveContent], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `merged_deltarune_${Date.now()}.sav`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                log('Merge completed successfully! File downloaded.', 'success');
+                
+                // Show success animation
+                document.getElementById('mergeBtn').classList.add('pulse');
+                setTimeout(() => {
+                    document.getElementById('mergeBtn').classList.remove('pulse');
+                }, 2000);
+
+            } catch (error) {
+                log(`Merge failed: ${error.message}`, 'error');
+            }
+        }
+
+        function showSaveDetails(index) {
+            const save = uploadedSaves[index];
+            const modal = document.getElementById('detailsModal');
+            const title = document.getElementById('modalTitle');
+            const content = document.getElementById('modalContent');
+
+            title.textContent = save.filename;
+            
+            let html = '<div style="max-height: 400px; overflow-y: auto;">';
+            
+            // Show all slots
+            Object.entries(save.slots).forEach(([slotName, slotData]) => {
+                const stats = save.stats[slotName];
+                html += `
+                    <div style="background: var(--bg-hover); padding: 1rem; margin-bottom: 1rem; border-radius: 8px;">
+                        <h3 style="color: var(--primary); margin-bottom: 0.5rem;">${slotName}</h3>
+                        <p>Character: ${stats.name}</p>
+                        <p>Level: ${stats.level}</p>
+                        <p>Chapter: ${stats.chapter}</p>
+                        <p>Status: ${stats.isCompleted ? 'Completed' : 'In Progress'}</p>
+                    </div>
+                `;
+            });
+            
+            if (save.drIni) {
+                html += `
+                    <div style="background: var(--bg-hover); padding: 1rem; margin-bottom: 1rem; border-radius: 8px;">
+                        <h3 style="color: var(--primary); margin-bottom: 0.5rem;">dr.ini</h3>
+                        <p>Configuration file present</p>
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            content.innerHTML = html;
+            
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('detailsModal').style.display = 'none';
+        }
+
+        function log(message, type = 'info') {
+            const logContent = document.getElementById('logContent');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            
+            logContent.appendChild(entry);
+            logContent.scrollTop = logContent.scrollHeight;
+        }
+
+        function showProgress() {
+            document.getElementById('progressBar').style.display = 'block';
+        }
+
+        function hideProgress() {
+            document.getElementById('progressBar').style.display = 'none';
+            document.getElementById('progressFill').style.width = '0%';
+        }
+
+        function updateProgress(percent) {
+            document.getElementById('progressFill').style.width = `${percent}%`;
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('detailsModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
