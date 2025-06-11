@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deltarune Universal Save Converter - All Chapters</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .mode-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+            border: 2px solid transparent;
+        }
+
+        .mode-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            color: #000;
+            font-weight: bold;
+            border-color: #00ff88;
+        }
+
+        .upload-area {
+            border: 3px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area:hover {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .upload-area.dragover {
+            border-color: #00ccff;
+            background: rgba(0, 204, 255, 0.1);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            color: #00ff88;
+        }
+
+        .upload-text {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .upload-subtext {
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .file-info.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .file-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .file-name {
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .slots-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .slot-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 15px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .slot-card:hover {
+            border-color: #00ff88;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .slot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .slot-title {
+            font-weight: bold;
+            color: #00ccff;
+        }
+
+        .chapter-badge {
+            background: #00ff88;
+            color: #000;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .slot-details {
+            font-size: 0.9em;
+            color: #ccc;
+            line-height: 1.6;
+        }
+
+        .slot-detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .convert-btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            color: #000;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .convert-btn.show {
+            display: block;
+        }
+
+        .convert-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .convert-btn:active {
+            transform: translateY(0);
+        }
+
+        .convert-btn:disabled {
+            background: #444;
+            color: #888;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .progress-bar.show {
+            display: block;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00ccff);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .status-message {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .status-message.show {
+            display: block;
+        }
+
+        .status-message.success {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+            border: 1px solid #00ff88;
+        }
+
+        .status-message.error {
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff4444;
+            border: 1px solid #ff4444;
+        }
+
+        .download-section {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .download-section.show {
+            display: block;
+        }
+
+        .download-btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #00ff88;
+            color: #000;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .footer a {
+            color: #00ff88;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .mode-selector {
+                flex-direction: column;
+            }
+
+            .mode-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Deltarune Save Converter</h1>
+        <p class="subtitle">Convert save files between Switch/Console and PC formats - All Chapters</p>
+
+        <div class="mode-selector">
+            <button class="mode-btn active" data-mode="switch-to-pc">Switch → PC</button>
+            <button class="mode-btn" data-mode="pc-to-switch">PC → Switch</button>
+        </div>
+
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📁</div>
+            <div class="upload-text">Drop your save file here</div>
+            <div class="upload-subtext">or click to browse</div>
+            <input type="file" id="fileInput" accept=".sav,.dat,filech1_*,filech2_*,filech3_*,filech4_*">
+        </div>
+
+        <div class="file-info" id="fileInfo">
+            <div class="file-details">
+                <div>
+                    <span>File: </span>
+                    <span class="file-name" id="fileName"></span>
+                </div>
+                <div>
+                    <span>Size: </span>
+                    <span id="fileSize"></span>
+                </div>
+                <div>
+                    <span>Type: </span>
+                    <span id="fileType"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="slots-container" id="slotsContainer"></div>
+
+        <button class="convert-btn" id="convertBtn">Convert Save File</button>
+
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="status-message" id="statusMessage"></div>
+
+        <div class="download-section" id="downloadSection">
+            <a href="#" class="download-btn" id="downloadBtn" download>Download Converted Save</a>
+        </div>
+
+        <div class="footer">
+            <p>Made with ❤️ by <a href="https://github.com/DrakeOne" target="_blank">DrakeOne</a></p>
+            <p>This tool is not affiliated with Toby Fox or DELTARUNE</p>
+        </div>
+    </div>
+
+    <script>
+        // GMSList decoder/encoder implementation
+        class GMSList {
+            static decode(hexString) {
+                if (!hexString.startsWith('2E010000') && !hexString.startsWith('2F010000')) {
+                    throw new Error('Invalid ds_list format');
+                }
+
+                const bytes = this.hexToBytes(hexString);
+                const items = [];
+                let offset = 8;
+
+                while (offset < bytes.length) {
+                    const type = this.readInt32(bytes, offset);
+                    offset += 4;
+
+                    if (type === 0) { // Real
+                        const value = this.readDouble(bytes, offset);
+                        items.push(value);
+                        offset += 8;
+                    } else if (type === 1) { // String
+                        const length = this.readInt32(bytes, offset);
+                        offset += 4;
+                        const value = this.readString(bytes, offset, length);
+                        items.push(value);
+                        offset += length;
+                    }
+                }
+
+                return items;
+            }
+
+            static encode(items) {
+                const bytes = [];
+                
+                // Header
+                bytes.push(...[0x2E, 0x01, 0x00, 0x00]);
+                bytes.push(...this.int32ToBytes(items.length));
+
+                for (const item of items) {
+                    if (typeof item === 'number') {
+                        bytes.push(...this.int32ToBytes(0)); // Type: Real
+                        bytes.push(...this.doubleToBytes(item));
+                    } else if (typeof item === 'string') {
+                        bytes.push(...this.int32ToBytes(1)); // Type: String
+                        const strBytes = this.stringToBytes(item);
+                        bytes.push(...this.int32ToBytes(strBytes.length));
+                        bytes.push(...strBytes);
+                    }
+                }
+
+                return this.bytesToHex(bytes);
+            }
+
+            static hexToBytes(hex) {
+                const bytes = [];
+                for (let i = 0; i < hex.length; i += 2) {
+                    bytes.push(parseInt(hex.substr(i, 2), 16));
+                }
+                return bytes;
+            }
+
+            static bytesToHex(bytes) {
+                return bytes.map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+            }
+
+            static readInt32(bytes, offset) {
+                return bytes[offset] | (bytes[offset + 1] << 8) | (bytes[offset + 2] << 16) | (bytes[offset + 3] << 24);
+            }
+
+            static readDouble(bytes, offset) {
+                const buffer = new ArrayBuffer(8);
+                const view = new DataView(buffer);
+                for (let i = 0; i < 8; i++) {
+                    view.setUint8(i, bytes[offset + i]);
+                }
+                return view.getFloat64(0, true);
+            }
+
+            static readString(bytes, offset, length) {
+                const decoder = new TextDecoder('ascii');
+                return decoder.decode(new Uint8Array(bytes.slice(offset, offset + length)));
+            }
+
+            static int32ToBytes(value) {
+                return [
+                    value & 0xFF,
+                    (value >> 8) & 0xFF,
+                    (value >> 16) & 0xFF,
+                    (value >> 24) & 0xFF
+                ];
+            }
+
+            static doubleToBytes(value) {
+                const buffer = new ArrayBuffer(8);
+                const view = new DataView(buffer);
+                view.setFloat64(0, value, true);
+                const bytes = [];
+                for (let i = 0; i < 8; i++) {
+                    bytes.push(view.getUint8(i));
+                }
+                return bytes;
+            }
+
+            static stringToBytes(str) {
+                const encoder = new TextEncoder();
+                return Array.from(encoder.encode(str));
+            }
+        }
+
+        // Save file structure definitions
+        const CHAPTER_CONFIGS = {
+            1: {
+                pcLines: 10318,
+                consoleLines: 223,
+                flagCount: 9999,
+                partySize: 4,
+                itemSlots: 13,
+                weaponSlots: 13,
+                armorSlots: 13
+            },
+            2: {
+                pcLines: 3055,
+                consoleLines: 308,
+                flagCount: 2500,
+                partySize: 5,
+                itemSlots: 13,
+                weaponSlots: 48,
+                armorSlots: 48,
+                pocketItems: 72
+            },
+            3: {
+                pcLines: 3055,
+                consoleLines: 308,
+                flagCount: 2500,
+                partySize: 5,
+                itemSlots: 13,
+                weaponSlots: 48,
+                armorSlots: 48,
+                pocketItems: 72
+            },
+            4: {
+                pcLines: 3055,
+                consoleLines: 308,
+                flagCount: 2500,
+                partySize: 5,
+                itemSlots: 13,
+                weaponSlots: 48,
+                armorSlots: 48,
+                pocketItems: 72
+            }
+        };
+
+        // Global variables
+        let currentMode = 'switch-to-pc';
+        let currentFile = null;
+        let savData = null;
+
+        // DOM elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const fileType = document.getElementById('fileType');
+        const slotsContainer = document.getElementById('slotsContainer');
+        const convertBtn = document.getElementById('convertBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const statusMessage = document.getElementById('statusMessage');
+        const downloadSection = document.getElementById('downloadSection');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        // Mode selector
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentMode = btn.dataset.mode;
+                resetUI();
+            });
+        });
+
+        // File upload handlers
+        uploadArea.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFileSelect);
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        function handleFile(file) {
+            currentFile = file;
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            
+            // Determine file type
+            if (file.name.endsWith('.sav')) {
+                fileType.textContent = 'Switch/Console Save Bundle';
+            } else if (file.name.startsWith('filech')) {
+                const chapter = file.name.match(/filech(\d+)/)?.[1];
+                fileType.textContent = `Chapter ${chapter} Save File`;
+            } else {
+                fileType.textContent = 'Unknown';
+            }
+
+            fileInfo.classList.add('show');
+            
+            // Read file
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const content = e.target.result;
+                processFile(content, file.name);
+            };
+            reader.readAsText(file);
+        }
+
+        function processFile(content, filename) {
+            resetStatus();
+            
+            try {
+                if (filename.endsWith('.sav')) {
+                    // Parse SAV file
+                    savData = JSON.parse(content.split('\0')[0]);
+                    displaySlots();
+                    convertBtn.classList.add('show');
+                } else if (filename.startsWith('filech')) {
+                    // Single file conversion
+                    savData = { [filename]: content };
+                    displaySlots();
+                    convertBtn.classList.add('show');
+                }
+            } catch (error) {
+                showError('Failed to parse save file: ' + error.message);
+            }
+        }
+
+        function displaySlots() {
+            slotsContainer.innerHTML = '';
+            
+            for (const [filename, data] of Object.entries(savData)) {
+                if (filename === 'default') continue;
+                
+                const match = filename.match(/filech(\d+)_(\d+)/);
+                if (!match) continue;
+                
+                const chapter = parseInt(match[1]);
+                const slot = parseInt(match[2]);
+                
+                const slotCard = createSlotCard(chapter, slot, data);
+                slotsContainer.appendChild(slotCard);
+            }
+        }
+
+        function createSlotCard(chapter, slot, data) {
+            const card = document.createElement('div');
+            card.className = 'slot-card';
+            
+            const lines = data.trim().split(/\r?\n/);
+            const truename = lines[0] || 'Empty';
+            
+            // Parse save data based on format
+            let level = 1, time = 0, room = 0;
+            
+            if (currentMode === 'switch-to-pc') {
+                // Console format - need to parse
+                const config = CHAPTER_CONFIGS[chapter];
+                if (config) {
+                    // Basic parsing for display
+                    level = parseFloat(lines[13]) || 1;
+                    room = parseFloat(lines[config.consoleLines - 2]) || 0;
+                    time = parseFloat(lines[config.consoleLines - 1]) || 0;
+                }
+            } else {
+                // PC format - direct line reading
+                level = parseFloat(lines[13]) || 1;
+                room = parseFloat(lines[lines.length - 2]) || 0;
+                time = parseFloat(lines[lines.length - 1]) || 0;
+            }
+            
+            card.innerHTML = `
+                <div class="slot-header">
+                    <div class="slot-title">Slot ${slot + 1}</div>
+                    <div class="chapter-badge">Chapter ${chapter}</div>
+                </div>
+                <div class="slot-details">
+                    <div class="slot-detail-row">
+                        <span>Name:</span>
+                        <span>${truename}</span>
+                    </div>
+                    <div class="slot-detail-row">
+                        <span>Level:</span>
+                        <span>${level}</span>
+                    </div>
+                    <div class="slot-detail-row">
+                        <span>Time:</span>
+                        <span>${formatTime(time)}</span>
+                    </div>
+                    <div class="slot-detail-row">
+                        <span>Room:</span>
+                        <span>${room}</span>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // Convert button handler
+        convertBtn.addEventListener('click', async () => {
+            convertBtn.disabled = true;
+            progressBar.classList.add('show');
+            
+            try {
+                const converted = await convertSaveData();
+                
+                // Create download
+                let blob, downloadName;
+                
+                if (currentFile.name.endsWith('.sav')) {
+                    // Bundle format
+                    const json = JSON.stringify(converted);
+                    blob = new Blob([json], { type: 'application/json' });
+                    downloadName = currentFile.name.replace('.sav', '_converted.sav');
+                } else {
+                    // Single file
+                    const filename = Object.keys(converted)[0];
+                    blob = new Blob([converted[filename]], { type: 'text/plain' });
+                    downloadName = filename;
+                }
+                
+                const url = URL.createObjectURL(blob);
+                downloadBtn.href = url;
+                downloadBtn.download = downloadName;
+                downloadSection.classList.add('show');
+                
+                showSuccess('Conversion completed successfully!');
+            } catch (error) {
+                showError('Conversion failed: ' + error.message);
+            } finally {
+                convertBtn.disabled = false;
+                progressBar.classList.remove('show');
+            }
+        });
+
+        async function convertSaveData() {
+            const converted = {};
+            const entries = Object.entries(savData);
+            
+            for (let i = 0; i < entries.length; i++) {
+                const [filename, data] = entries[i];
+                
+                if (filename === 'default') {
+                    converted.default = '';
+                    continue;
+                }
+                
+                // Update progress
+                const progress = ((i + 1) / entries.length) * 100;
+                progressFill.style.width = progress + '%';
+                
+                // Small delay for UI update
+                await new Promise(resolve => setTimeout(resolve, 10));
+                
+                const match = filename.match(/filech(\d+)_(\d+)/);
+                if (!match) {
+                    converted[filename] = data;
+                    continue;
+                }
+                
+                const chapter = parseInt(match[1]);
+                
+                if (currentMode === 'switch-to-pc') {
+                    converted[filename] = convertConsoleToPC(data, chapter);
+                } else {
+                    converted[filename] = convertPCToConsole(data, chapter);
+                }
+            }
+            
+            return converted;
+        }
+
+        function convertConsoleToPC(data, chapter) {
+            const lines = data.trim().split(/\r?\n/);
+            const config = CHAPTER_CONFIGS[chapter];
+            const output = [];
+            let lineIndex = 0;
+            
+            // Truename
+            output.push(lines[lineIndex++]);
+            
+            // Othernames
+            const othernames = GMSList.decode(lines[lineIndex++]);
+            for (let i = 0; i < 6; i++) {
+                output.push(othernames[i] || '');
+            }
+            
+            // Character array
+            for (let i = 0; i < 3; i++) {
+                output.push(lines[lineIndex++]);
+            }
+            
+            // Basic stats
+            for (let i = 0; i < 6; i++) {
+                output.push(lines[lineIndex++]);
+            }
+            
+            // Party stats arrays
+            const partyArrays = [
+                'hp', 'maxhp', 'at', 'df', 'mag', 'guts',
+                'charweapon', 'chararmor1', 'chararmor2', 'weaponstyle'
+            ];
+            
+            for (const arrayName of partyArrays) {
+                const array = GMSList.decode(lines[lineIndex++]);
+                if (arrayName === 'weaponstyle') {
+                    for (let i = 0; i < config.partySize; i++) {
+                        output.push(array[i] || '');
+                    }
+                } else {
+                    for (let i = 0; i < config.partySize; i++) {
+                        output.push(array[i] || '0');
+                    }
+                }
+            }
+            
+            // Item stats (per party member)
+            for (let i = 0; i < config.partySize; i++) {
+                for (let q = 0; q < 4; q++) {
+                    // itemat, itemdf, itemmag, itembolts, itemgrazeamt, itemgrazesize, itemboltspeed, itemspecial
+                    for (let stat = 0; stat < 8; stat++) {
+                        output.push(lines[lineIndex++]);
+                    }
+                    
+                    // Chapter 2+ has additional item stats
+                    if (chapter >= 2) {
+                        output.push(lines[lineIndex++]); // itemelement
+                        output.push(lines[lineIndex++]); // itemelementamount
+                    }
+                }
+                
+                // Spells
+                for (let j = 0; j < 12; j++) {
+                    output.push(lines[lineIndex++]);
+                }
+            }
+            
+            // Global stats
+            for (let i = 0; i < 3; i++) {
+                output.push(lines[lineIndex++]);
+            }
+            
+            // Inventory arrays
+            const invArrays = ['item', 'keyitem'];
+            for (const arrayName of invArrays) {
+                const array = GMSList.decode(lines[lineIndex++]);
+                for (let i = 0; i < config.itemSlots; i++) {
+                    output.push(array[i] || '0');
+                }
+            }
+            
+            // Weapon and armor arrays
+            const weaponArray = GMSList.decode(lines[lineIndex++]);
+            for (let i = 0; i < config.weaponSlots; i++) {
+                output.push(weaponArray[i] || '0');
+            }
+            
+            const armorArray = GMSList.decode(lines[lineIndex++]);
+            for (let i = 0; i < config.armorSlots; i++) {
+                output.push(armorArray[i] || '0');
+            }
+            
+            // Chapter 2+ pocket items
+            if (chapter >= 2 && config.pocketItems) {
+                const pocketArray = GMSList.decode(lines[lineIndex++]);
+                for (let i = 0; i < config.pocketItems; i++) {
+                    output.push(pocketArray[i] || '0');
+                }
+            }
+            
+            // Tension and light world stats
+            for (let i = 0; i < 13; i++) {
+                output.push(lines[lineIndex++]);
+            }
+            
+            // Light world items and phone
+            const litemArray = GMSList.decode(lines[lineIndex++]);
+            const phoneArray = GMSList.decode(lines[lineIndex++]);
+            
+            for (let i = 0; i < 8; i++) {
+                output.push(litemArray[i] || '0');
+                output.push(phoneArray[i] || '0');
+            }
+            
+            // Flags
+            const flagArray = GMSList.decode(lines[lineIndex++]);
+            for (let i = 0; i < config.flagCount; i++) {
+                output.push(flagArray[i] || '0');
+            }
+            
+            // Final stats
+            output.push(lines[lineIndex++]); // plot
+            output.push(lines[lineIndex++]); // currentroom
+            output.push(lines[lineIndex++]); // time
+            
+            return output.join('\r\n');
+        }
+
+        function convertPCToConsole(data, chapter) {
+            const lines = data.trim().split(/\r?\n/);
+            const config = CHAPTER_CONFIGS[chapter];
+            const output = [];
+            let lineIndex = 0;
+            
+            // Truename
+            output.push(lines[lineIndex++]);
+            
+            // Othernames
+            const othernames = [];
+            for (let i = 0; i < 6; i++) {
+                othernames.push(lines[lineIndex++]);
+            }
+            output.push(GMSList.encode(othernames));
+            
+            // Character array
+            for (let i = 0; i < 3; i++) {
+                output.push(lines[lineIndex++]);
+            }
+            
+            // Basic stats
+            for (let i = 0; i < 6; i++) {
+                output.push(lines[lineIndex++]);
+            }
+            
+            // Party stats arrays
+            const partyArrayNames = [
+                'hp', 'maxhp', 'at', 'df', 'mag', 'guts',
+                'charweapon', 'chararmor1', 'chararmor2', 'weaponstyle'
+            ];
+            
+            for (const arrayName of partyArrayNames) {
+                const array = [];
+                for (let i = 0; i < config.partySize; i++) {
+                    if (arrayName === 'weaponstyle') {
+                        array.push(lines[lineIndex++]);
+                    } else {
+                        array.push(parseFloat(lines[lineIndex++]) || 0);
+                    }
+                }
+                output.push(GMSList.encode(array));
+            }
+            
+            // Item stats (per party member)
+            for (let i = 0; i < config.partySize; i++) {
+                for (let q = 0; q < 4; q++) {
+                    // itemat, itemdf, itemmag, itembolts, itemgrazeamt, itemgrazesize, itemboltspeed, itemspecial
+                    for (let stat = 0; stat < 8; stat++) {
+                        output.push(lines[lineIndex++]);
+                    }
+                    
+                    // Chapter 2+ has additional item stats
+                    if (chapter >= 2) {
+                        output.push(lines[lineIndex++]); // itemelement
+                        output.push(lines[lineIndex++]); // itemelementamount
+                    }
+                }
+                
+                // Spells
+                for (let j = 0; j < 12; j++) {
+                    output.push(lines[lineIndex++]);
+                }
+            }
+            
+            // Global stats
+            for (let i = 0; i < 3; i++) {
+                output.push(lines[lineIndex++]);
+            }
+            
+            // Item array
+            const items = [];
+            for (let i = 0; i < config.itemSlots; i++) {
+                items.push(parseFloat(lines[lineIndex++]) || 0);
+            }
+            output.push(GMSList.encode(items));
+            
+            // Keyitem array
+            const keyitems = [];
+            for (let i = 0; i < config.itemSlots; i++) {
+                keyitems.push(parseFloat(lines[lineIndex++]) || 0);
+            }
+            output.push(GMSList.encode(keyitems));
+            
+            // Weapon array
+            const weapons = [];
+            for (let i = 0; i < config.weaponSlots; i++) {
+                weapons.push(parseFloat(lines[lineIndex++]) || 0);
+            }
+            output.push(GMSList.encode(weapons));
+            
+            // Armor array
+            const armors = [];
+            for (let i = 0; i < config.armorSlots; i++) {
+                armors.push(parseFloat(lines[lineIndex++]) || 0);
+            }
+            output.push(GMSList.encode(armors));
+            
+            // Chapter 2+ pocket items
+            if (chapter >= 2 && config.pocketItems) {
+                const pocketItems = [];
+                for (let i = 0; i < config.pocketItems; i++) {
+                    pocketItems.push(parseFloat(lines[lineIndex++]) || 0);
+                }
+                output.push(GMSList.encode(pocketItems));
+            }
+            
+            // Tension and light world stats
+            for (let i = 0; i < 13; i++) {
+                output.push(lines[lineIndex++]);
+            }
+            
+            // Light world items
+            const litems = [];
+            const phones = [];
+            for (let i = 0; i < 8; i++) {
+                litems.push(parseFloat(lines[lineIndex++]) || 0);
+                phones.push(parseFloat(lines[lineIndex++]) || 0);
+            }
+            output.push(GMSList.encode(litems));
+            output.push(GMSList.encode(phones));
+            
+            // Flags
+            const flags = [];
+            for (let i = 0; i < config.flagCount; i++) {
+                flags.push(parseFloat(lines[lineIndex++]) || 0);
+            }
+            output.push(GMSList.encode(flags));
+            
+            // Final stats
+            output.push(lines[lineIndex++]); // plot
+            output.push(lines[lineIndex++]); // currentroom
+            output.push(lines[lineIndex++]); // time
+            
+            return output.join('\r\n');
+        }
+
+        // Utility functions
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+        }
+
+        function formatTime(frames) {
+            const totalSeconds = Math.floor(frames / 30);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            
+            if (hours > 0) {
+                return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function resetUI() {
+            fileInfo.classList.remove('show');
+            slotsContainer.innerHTML = '';
+            convertBtn.classList.remove('show');
+            progressBar.classList.remove('show');
+            statusMessage.classList.remove('show');
+            downloadSection.classList.remove('show');
+            fileInput.value = '';
+            currentFile = null;
+            savData = null;
+        }
+
+        function resetStatus() {
+            statusMessage.classList.remove('show', 'success', 'error');
+            downloadSection.classList.remove('show');
+        }
+
+        function showSuccess(message) {
+            statusMessage.textContent = message;
+            statusMessage.className = 'status-message show success';
+        }
+
+        function showError(message) {
+            statusMessage.textContent = message;
+            statusMessage.className = 'status-message show error';
+        }
+    </script>
+</body>
+</html>
