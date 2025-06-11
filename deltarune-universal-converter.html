@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deltarune Universal Save Converter - All Chapters</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #a0a0a0;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .converter-section {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .direction-selector {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .direction-btn {
+            padding: 15px 30px;
+            border: 2px solid transparent;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        .direction-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .direction-btn.active {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border-color: transparent;
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .file-upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .file-upload-area:hover {
+            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .file-upload-area.drag-over {
+            border-color: #4ecdc4;
+            background: rgba(78, 205, 196, 0.1);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+            color: #4ecdc4;
+        }
+
+        .file-list {
+            margin-top: 20px;
+        }
+
+        .file-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .file-details h4 {
+            margin-bottom: 5px;
+            color: #fff;
+        }
+
+        .file-details p {
+            color: #a0a0a0;
+            font-size: 0.9em;
+        }
+
+        .remove-btn {
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid rgba(255, 107, 107, 0.5);
+            color: #ff6b6b;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .remove-btn:hover {
+            background: rgba(255, 107, 107, 0.3);
+        }
+
+        .convert-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(45deg, #4ecdc4, #44a3aa);
+            border: none;
+            color: white;
+            font-size: 1.2em;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            box-shadow: 0 5px 20px rgba(78, 205, 196, 0.3);
+        }
+
+        .convert-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(78, 205, 196, 0.4);
+        }
+
+        .convert-btn:disabled {
+            background: #555;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .status-message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .status-message.success {
+            background: rgba(78, 205, 196, 0.2);
+            border: 1px solid rgba(78, 205, 196, 0.5);
+            color: #4ecdc4;
+        }
+
+        .status-message.error {
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid rgba(255, 107, 107, 0.5);
+            color: #ff6b6b;
+        }
+
+        .status-message.info {
+            background: rgba(100, 149, 237, 0.2);
+            border: 1px solid rgba(100, 149, 237, 0.5);
+            color: #6495ed;
+        }
+
+        .download-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .download-btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background: linear-gradient(45deg, #4ecdc4, #44a3aa);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(78, 205, 196, 0.3);
+        }
+
+        .chapter-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+
+        .slot-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: rgba(100, 149, 237, 0.3);
+            border-radius: 15px;
+            font-size: 0.8em;
+            margin-left: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .direction-selector {
+                flex-direction: column;
+            }
+
+            .direction-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Deltarune Save Converter</h1>
+        <p class="subtitle">Universal converter for all chapters (1-4) • Switch ↔ PC</p>
+
+        <div class="converter-section">
+            <div class="direction-selector">
+                <button class="direction-btn active" data-direction="switch-to-pc">
+                    🎮 Switch → 💻 PC
+                </button>
+                <button class="direction-btn" data-direction="pc-to-switch">
+                    💻 PC → 🎮 Switch
+                </button>
+            </div>
+
+            <div class="file-upload-area" id="uploadArea">
+                <input type="file" id="fileInput" class="file-input" multiple accept=".sav,*">
+                <div class="upload-icon">📁</div>
+                <h3>Drop files here or click to browse</h3>
+                <p style="margin-top: 10px; color: #a0a0a0;">
+                    <span id="uploadHint">Upload .sav files from Switch</span>
+                </p>
+            </div>
+
+            <div class="file-list" id="fileList"></div>
+
+            <button class="convert-btn" id="convertBtn" disabled>
+                Convert Files
+            </button>
+
+            <div class="status-message" id="statusMessage"></div>
+
+            <div class="download-section" id="downloadSection"></div>
+        </div>
+    </div>
+
+    <script>
+        // GMSList decoder/encoder implementation
+        class GMSList {
+            static decode(hexString) {
+                if (!hexString.startsWith('2E010000') && !hexString.startsWith('2F010000')) {
+                    throw new Error('Invalid GMSList format');
+                }
+
+                const bytes = [];
+                for (let i = 0; i < hexString.length; i += 2) {
+                    bytes.push(parseInt(hexString.substr(i, 2), 16));
+                }
+
+                const view = new DataView(new Uint8Array(bytes).buffer);
+                const items = [];
+                let offset = 8;
+
+                while (offset < bytes.length) {
+                    const type = view.getInt32(offset, true);
+                    offset += 4;
+
+                    if (type === 0) { // Real
+                        const value = view.getFloat64(offset, true);
+                        items.push(value);
+                        offset += 8;
+                    } else if (type === 1) { // String
+                        const length = view.getInt32(offset, true);
+                        offset += 4;
+                        let str = '';
+                        for (let i = 0; i < length; i++) {
+                            str += String.fromCharCode(bytes[offset + i]);
+                        }
+                        items.push(str);
+                        offset += length;
+                    }
+                }
+
+                return items;
+            }
+
+            static encode(items) {
+                const bytes = [];
+                
+                // Header
+                bytes.push(0x2E, 0x01, 0x00, 0x00);
+                
+                // Item count
+                const countBytes = new Uint8Array(4);
+                new DataView(countBytes.buffer).setInt32(0, items.length, true);
+                bytes.push(...countBytes);
+
+                // Items
+                for (const item of items) {
+                    if (typeof item === 'number') {
+                        // Type: Real
+                        bytes.push(0x00, 0x00, 0x00, 0x00);
+                        
+                        // Value
+                        const valueBytes = new Uint8Array(8);
+                        new DataView(valueBytes.buffer).setFloat64(0, item, true);
+                        bytes.push(...valueBytes);
+                    } else if (typeof item === 'string') {
+                        // Type: String
+                        bytes.push(0x01, 0x00, 0x00, 0x00);
+                        
+                        // Length
+                        const lengthBytes = new Uint8Array(4);
+                        new DataView(lengthBytes.buffer).setInt32(0, item.length, true);
+                        bytes.push(...lengthBytes);
+                        
+                        // String data
+                        for (let i = 0; i < item.length; i++) {
+                            bytes.push(item.charCodeAt(i));
+                        }
+                    }
+                }
+
+                return bytes.map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+            }
+        }
+
+        // Save file converter
+        class DeltaruneSaveConverter {
+            constructor() {
+                this.currentDirection = 'switch-to-pc';
+                this.files = [];
+                this.setupEventListeners();
+            }
+
+            setupEventListeners() {
+                // Direction buttons
+                document.querySelectorAll('.direction-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.direction-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.currentDirection = e.target.dataset.direction;
+                        this.updateUploadHint();
+                        this.clearFiles();
+                    });
+                });
+
+                // File upload
+                const uploadArea = document.getElementById('uploadArea');
+                const fileInput = document.getElementById('fileInput');
+
+                uploadArea.addEventListener('click', () => fileInput.click());
+                fileInput.addEventListener('change', (e) => this.handleFiles(e.target.files));
+
+                // Drag and drop
+                uploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.add('drag-over');
+                });
+
+                uploadArea.addEventListener('dragleave', () => {
+                    uploadArea.classList.remove('drag-over');
+                });
+
+                uploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.remove('drag-over');
+                    this.handleFiles(e.dataTransfer.files);
+                });
+
+                // Convert button
+                document.getElementById('convertBtn').addEventListener('click', () => this.convertFiles());
+            }
+
+            updateUploadHint() {
+                const hint = document.getElementById('uploadHint');
+                if (this.currentDirection === 'switch-to-pc') {
+                    hint.textContent = 'Upload .sav files from Switch';
+                } else {
+                    hint.textContent = 'Upload individual save files from PC (filech1_0, filech2_0, etc.)';
+                }
+            }
+
+            clearFiles() {
+                this.files = [];
+                document.getElementById('fileList').innerHTML = '';
+                document.getElementById('convertBtn').disabled = true;
+                document.getElementById('statusMessage').style.display = 'none';
+                document.getElementById('downloadSection').style.display = 'none';
+            }
+
+            detectChapterAndSlot(filename) {
+                const match = filename.match(/filech(\d+)_(\d+)/);
+                if (match) {
+                    return {
+                        chapter: parseInt(match[1]),
+                        slot: parseInt(match[2])
+                    };
+                }
+                return null;
+            }
+
+            handleFiles(fileList) {
+                Array.from(fileList).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const fileData = {
+                            name: file.name,
+                            content: e.target.result,
+                            size: file.size
+                        };
+
+                        if (this.currentDirection === 'switch-to-pc' && file.name.endsWith('.sav')) {
+                            // Extract files from SAV
+                            try {
+                                const savContent = JSON.parse(fileData.content);
+                                Object.keys(savContent).forEach(key => {
+                                    if (key !== 'default') {
+                                        this.files.push({
+                                            name: key,
+                                            content: savContent[key],
+                                            size: savContent[key].length,
+                                            fromSav: file.name
+                                        });
+                                    }
+                                });
+                            } catch (err) {
+                                this.showStatus('Error parsing SAV file: ' + err.message, 'error');
+                            }
+                        } else {
+                            this.files.push(fileData);
+                        }
+
+                        this.updateFileList();
+                    };
+                    reader.readAsText(file);
+                });
+            }
+
+            updateFileList() {
+                const fileList = document.getElementById('fileList');
+                fileList.innerHTML = '';
+
+                this.files.forEach((file, index) => {
+                    const info = this.detectChapterAndSlot(file.name);
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    
+                    fileItem.innerHTML = `
+                        <div class="file-info">
+                            <div class="file-icon">${info ? `CH${info.chapter}` : '📄'}</div>
+                            <div class="file-details">
+                                <h4>${file.name}${info ? `<span class="chapter-badge">Chapter ${info.chapter}</span><span class="slot-badge">Slot ${info.slot}</span>` : ''}</h4>
+                                <p>${(file.size / 1024).toFixed(2)} KB${file.fromSav ? ` • From ${file.fromSav}` : ''}</p>
+                            </div>
+                        </div>
+                        <button class="remove-btn" onclick="converter.removeFile(${index})">Remove</button>
+                    `;
+
+                    fileList.appendChild(fileItem);
+                });
+
+                document.getElementById('convertBtn').disabled = this.files.length === 0;
+            }
+
+            removeFile(index) {
+                this.files.splice(index, 1);
+                this.updateFileList();
+            }
+
+            convertFiles() {
+                this.showStatus('Converting files...', 'info');
+                const results = [];
+
+                try {
+                    if (this.currentDirection === 'switch-to-pc') {
+                        this.files.forEach(file => {
+                            const info = this.detectChapterAndSlot(file.name);
+                            if (info) {
+                                const converted = this.convertConsoleToPC(file.content, info.chapter);
+                                results.push({
+                                    name: file.name,
+                                    content: converted,
+                                    chapter: info.chapter,
+                                    slot: info.slot
+                                });
+                            }
+                        });
+                    } else {
+                        // Group files by save slot for PC to Switch conversion
+                        const savFiles = {};
+                        
+                        this.files.forEach(file => {
+                            const info = this.detectChapterAndSlot(file.name);
+                            if (info) {
+                                const converted = this.convertPCToConsole(file.content, info.chapter);
+                                const savName = `deltarune_ch${info.chapter}.sav`;
+                                
+                                if (!savFiles[savName]) {
+                                    savFiles[savName] = { default: "" };
+                                }
+                                
+                                savFiles[savName][file.name] = converted;
+                            }
+                        });
+
+                        // Create SAV files
+                        Object.keys(savFiles).forEach(savName => {
+                            results.push({
+                                name: savName,
+                                content: JSON.stringify(savFiles[savName]),
+                                isSav: true
+                            });
+                        });
+                    }
+
+                    this.showDownloads(results);
+                    this.showStatus(`Successfully converted ${results.length} file(s)!`, 'success');
+                } catch (err) {
+                    this.showStatus('Conversion error: ' + err.message, 'error');
+                    console.error(err);
+                }
+            }
+
+            convertConsoleToPC(content, chapter) {
+                const lines = content.split('\n').map(line => line.trim());
+                const pcLines = [];
+                let lineIndex = 0;
+
+                // Process based on chapter (all chapters have same structure)
+                // Name
+                pcLines.push(lines[lineIndex++]);
+
+                // Other names (expanded from GMSList)
+                const otherNames = GMSList.decode(lines[lineIndex++]);
+                otherNames.forEach(name => pcLines.push(name));
+
+                // Character data (3 values)
+                for (let i = 0; i < 3; i++) {
+                    pcLines.push(lines[lineIndex++]);
+                }
+
+                // Basic stats (6 values)
+                for (let i = 0; i < 6; i++) {
+                    pcLines.push(lines[lineIndex++]);
+                }
+
+                // HP, MaxHP, AT, DF, Mag, Guts, Weapon, Armor1, Armor2 arrays
+                const arrays = ['hp', 'maxhp', 'at', 'df', 'mag', 'guts', 'charweapon', 'chararmor1', 'chararmor2'];
+                arrays.forEach(() => {
+                    const array = GMSList.decode(lines[lineIndex++]);
+                    array.forEach(val => pcLines.push(val.toString()));
+                });
+
+                // Weaponstyle array
+                const weaponStyles = GMSList.decode(lines[lineIndex++]);
+                weaponStyles.forEach(style => pcLines.push(style));
+
+                // Item stats (4x4x8 = 128 values per character)
+                for (let i = 0; i < 4; i++) {
+                    for (let q = 0; q < 4; q++) {
+                        for (let stat = 0; stat < 8; stat++) {
+                            pcLines.push(lines[lineIndex++]);
+                        }
+                    }
+                    // Spells (12 per character)
+                    for (let j = 0; j < 12; j++) {
+                        pcLines.push(lines[lineIndex++]);
+                    }
+                }
+
+                // Bolt stats (3 values)
+                for (let i = 0; i < 3; i++) {
+                    pcLines.push(lines[lineIndex++]);
+                }
+
+                // Item, keyitem, weapon, armor arrays
+                const inventoryArrays = ['item', 'keyitem', 'weapon', 'armor'];
+                inventoryArrays.forEach(() => {
+                    const array = GMSList.decode(lines[lineIndex++]);
+                    array.forEach(val => pcLines.push(val.toString()));
+                });
+
+                // Tension and other stats (11 values)
+                for (let i = 0; i < 11; i++) {
+                    pcLines.push(lines[lineIndex++]);
+                }
+
+                // Litem and phone arrays
+                const litemArray = GMSList.decode(lines[lineIndex++]);
+                const phoneArray = GMSList.decode(lines[lineIndex++]);
+                
+                for (let i = 0; i < 8; i++) {
+                    pcLines.push(litemArray[i].toString());
+                    pcLines.push(phoneArray[i].toString());
+                }
+
+                // Flags (9999 values)
+                const flags = GMSList.decode(lines[lineIndex++]);
+                flags.forEach(flag => pcLines.push(flag.toString()));
+
+                // Final 3 values (plot, currentroom, time)
+                for (let i = 0; i < 3; i++) {
+                    pcLines.push(lines[lineIndex++]);
+                }
+
+                // Ensure we have exactly 10318 lines
+                while (pcLines.length < 10318) {
+                    pcLines.push('0');
+                }
+
+                return pcLines.join('\r\n');
+            }
+
+            convertPCToConsole(content, chapter) {
+                const lines = content.split(/\r?\n/);
+                const consoleLines = [];
+                let lineIndex = 0;
+
+                // Name
+                consoleLines.push(lines[lineIndex++]);
+
+                // Other names (6 values to GMSList)
+                const otherNames = [];
+                for (let i = 0; i < 6; i++) {
+                    otherNames.push(lines[lineIndex++]);
+                }
+                consoleLines.push(GMSList.encode(otherNames));
+
+                // Character data (3 values)
+                for (let i = 0; i < 3; i++) {
+                    consoleLines.push(lines[lineIndex++]);
+                }
+
+                // Basic stats (6 values)
+                for (let i = 0; i < 6; i++) {
+                    consoleLines.push(lines[lineIndex++]);
+                }
+
+                // Arrays (4 values each)
+                const arrayNames = ['hp', 'maxhp', 'at', 'df', 'mag', 'guts', 'charweapon', 'chararmor1', 'chararmor2'];
+                arrayNames.forEach(() => {
+                    const array = [];
+                    for (let i = 0; i < 4; i++) {
+                        array.push(parseFloat(lines[lineIndex++]));
+                    }
+                    consoleLines.push(GMSList.encode(array));
+                });
+
+                // Weaponstyle array
+                const weaponStyles = [];
+                for (let i = 0; i < 4; i++) {
+                    weaponStyles.push(lines[lineIndex++]);
+                }
+                consoleLines.push(GMSList.encode(weaponStyles));
+
+                // Item stats
+                for (let i = 0; i < 4; i++) {
+                    for (let q = 0; q < 4; q++) {
+                        for (let stat = 0; stat < 8; stat++) {
+                            consoleLines.push(lines[lineIndex++]);
+                        }
+                    }
+                    // Spells
+                    for (let j = 0; j < 12; j++) {
+                        consoleLines.push(lines[lineIndex++]);
+                    }
+                }
+
+                // Bolt stats
+                for (let i = 0; i < 3; i++) {
+                    consoleLines.push(lines[lineIndex++]);
+                }
+
+                // Inventory arrays (13 values each)
+                const inventoryArrays = ['item', 'keyitem', 'weapon', 'armor'];
+                inventoryArrays.forEach(() => {
+                    const array = [];
+                    for (let i = 0; i < 13; i++) {
+                        array.push(parseFloat(lines[lineIndex++]));
+                    }
+                    consoleLines.push(GMSList.encode(array));
+                });
+
+                // Tension and other stats
+                for (let i = 0; i < 11; i++) {
+                    consoleLines.push(lines[lineIndex++]);
+                }
+
+                // Litem and phone arrays
+                const litemArray = [];
+                const phoneArray = [];
+                for (let i = 0; i < 8; i++) {
+                    litemArray.push(parseFloat(lines[lineIndex++]));
+                    phoneArray.push(parseFloat(lines[lineIndex++]));
+                }
+                consoleLines.push(GMSList.encode(litemArray));
+                consoleLines.push(GMSList.encode(phoneArray));
+
+                // Flags
+                const flags = [];
+                for (let i = 0; i < 9999; i++) {
+                    flags.push(parseFloat(lines[lineIndex++]));
+                }
+                consoleLines.push(GMSList.encode(flags));
+
+                // Final values
+                for (let i = 0; i < 3; i++) {
+                    consoleLines.push(lines[lineIndex++]);
+                }
+
+                return consoleLines.join('\r\n');
+            }
+
+            showStatus(message, type) {
+                const statusEl = document.getElementById('statusMessage');
+                statusEl.textContent = message;
+                statusEl.className = `status-message ${type}`;
+                statusEl.style.display = 'block';
+            }
+
+            showDownloads(results) {
+                const downloadSection = document.getElementById('downloadSection');
+                downloadSection.innerHTML = '<h3 style="margin-bottom: 15px;">Download Converted Files:</h3>';
+                
+                results.forEach(result => {
+                    const blob = new Blob([result.content], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = result.name;
+                    link.className = 'download-btn';
+                    link.innerHTML = `📥 ${result.name}`;
+                    
+                    downloadSection.appendChild(link);
+                });
+                
+                downloadSection.style.display = 'block';
+            }
+        }
+
+        // Initialize converter
+        const converter = new DeltaruneSaveConverter();
+    </script>
+</body>
+</html>
