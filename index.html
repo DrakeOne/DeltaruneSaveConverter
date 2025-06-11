@@ -1250,7 +1250,7 @@
 
     // Base class for Ch3 and Ch4 as they are very similar
     class DeltaruneCh3And4_BaseConverter {
-        constructor(flagCount = 5000) { // Default flag count for safety
+        constructor(flagCount = 5000) { 
             this.initializeData(flagCount);
         }
         
@@ -1265,7 +1265,7 @@
             this.invc = 0;
             this.darkzone = 0;
             
-            const charCount = 5; // Kris, Susie, Ralsei, Noelle, Placeholder
+            const charCount = 5;
             this.hp = new Array(charCount).fill(0);
             this.maxhp = new Array(charCount).fill(0);
             this.at = new Array(charCount).fill(0);
@@ -1668,16 +1668,20 @@
     
     class DeltaruneCh3Converter extends DeltaruneCh3And4_BaseConverter {
         constructor() {
-            super(5000); 
+            // CORRECCIÓN: Se ajusta el número de flags para que el total de líneas sea 3055,
+            // que es lo que espera el editor de Spamton.
+            // 675 (líneas base) + 2380 (flags) = 3055 líneas.
+            super(2380); 
         }
-        readFromConsole(lines) { this._read(lines, 5000); }
-        writeToPC() { return this._writePC(5000); }
-        readFromPC(lines) { this._readPC(lines, 5000); }
+        readFromConsole(lines) { this._read(lines, 2380); }
+        writeToPC() { return this._writePC(2380); }
+        readFromPC(lines) { this._readPC(lines, 2380); }
         writeToConsole() { return this._writeConsole(); }
     }
     
     class DeltaruneCh4Converter extends DeltaruneCh3And4_BaseConverter {
         constructor() {
+            // Se mantiene un número alto por seguridad, ya que no hay una referencia exacta.
             super(8000);
         }
         readFromConsole(lines) { this._read(lines, 8000); }
@@ -1689,7 +1693,7 @@
     // SAV Format Handler
     class SAVFormat {
         static extract(content) {
-            // Remove null bytes and other trailing junk
+            // Remove null bytes and other trailing junk more robustly
             const nullIndex = content.lastIndexOf('}');
             if (nullIndex !== -1) {
                 content = content.substring(0, nullIndex + 1);
@@ -2016,7 +2020,7 @@
     }
     
     // Initialize
-    log('🎮 Deltarune Save Converter Web Edition v2.0 (Ch1-4 Support)', 'info');
+    log('🎮 Deltarune Save Converter Web Edition v2.1 (Ch1-4 & Spamton Editor Fix)', 'info');
     log('📌 Drag .sav or filech*_* files to begin', 'info');
     log('💡 Supports bidirectional conversion PC ↔ Console', 'info');
     </script>
