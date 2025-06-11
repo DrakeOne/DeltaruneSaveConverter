@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deltarune Save Converter - PC ↔ Switch</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            text-align: center;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #a0a0a0;
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            padding: 40px 0;
+        }
+
+        .converter-box {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .chapter-selector {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .chapter-btn {
+            padding: 12px 30px;
+            border: 2px solid #4ecdc4;
+            background: transparent;
+            color: #4ecdc4;
+            border-radius: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chapter-btn:hover {
+            background: #4ecdc4;
+            color: #1a1a2e;
+            transform: translateY(-2px);
+        }
+
+        .chapter-btn.active {
+            background: #4ecdc4;
+            color: #1a1a2e;
+        }
+
+        .upload-area {
+            border: 3px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 60px 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area:hover {
+            border-color: #4ecdc4;
+            background: rgba(78, 205, 196, 0.1);
+        }
+
+        .upload-area.drag-over {
+            border-color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .upload-subtext {
+            color: #a0a0a0;
+            font-size: 0.9rem;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .file-info.show {
+            display: block;
+        }
+
+        .file-info h3 {
+            color: #4ecdc4;
+            margin-bottom: 10px;
+        }
+
+        .file-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .detail-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 15px;
+            border-radius: 8px;
+        }
+
+        .detail-label {
+            color: #a0a0a0;
+            font-size: 0.85rem;
+        }
+
+        .detail-value {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-top: 5px;
+        }
+
+        .convert-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .convert-btn.show {
+            display: block;
+        }
+
+        .convert-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(78, 205, 196, 0.4);
+        }
+
+        .convert-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-top: 20px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-bar.show {
+            display: block;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .result-area {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .result-area.show {
+            display: block;
+        }
+
+        .success-message {
+            background: rgba(78, 205, 196, 0.2);
+            border: 1px solid #4ecdc4;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .download-btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #4ecdc4;
+            color: #1a1a2e;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(78, 205, 196, 0.4);
+        }
+
+        .error-message {
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid #ff6b6b;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .footer {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px 0;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer a {
+            color: #4ecdc4;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .converter-box {
+                padding: 20px;
+            }
+
+            .chapter-selector {
+                flex-direction: column;
+            }
+
+            .chapter-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>Deltarune Save Converter</h1>
+            <p class="subtitle">Convierte tus saves entre PC y Nintendo Switch</p>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="converter-box">
+                <div class="chapter-selector">
+                    <button class="chapter-btn active" data-chapter="1">Capítulo 1</button>
+                    <button class="chapter-btn" data-chapter="2">Capítulo 2</button>
+                </div>
+
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📁</div>
+                    <div class="upload-text">Arrastra tu archivo aquí</div>
+                    <div class="upload-subtext">o haz clic para seleccionar</div>
+                    <input type="file" id="fileInput" accept=".sav,.ini,*">
+                </div>
+
+                <div class="file-info" id="fileInfo">
+                    <h3>Información del archivo</h3>
+                    <div class="file-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Nombre</div>
+                            <div class="detail-value" id="fileName">-</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Tipo detectado</div>
+                            <div class="detail-value" id="fileType">-</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Tamaño</div>
+                            <div class="detail-value" id="fileSize">-</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Capítulo</div>
+                            <div class="detail-value" id="fileChapter">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="convert-btn" id="convertBtn">Convertir archivo</button>
+
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+
+                <div class="result-area" id="resultArea">
+                    <div class="success-message">
+                        <p>¡Conversión completada con éxito!</p>
+                        <p style="margin-top: 10px;">
+                            <a href="#" class="download-btn" id="downloadBtn">Descargar archivo convertido</a>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Creado con ❤️ por <a href="https://github.com/DrakeOne">DrakeOne</a></p>
+        </div>
+    </footer>
+
+    <script>
+        // Configuración de capítulos
+        const CHAPTER_CONFIG = {
+            1: {
+                pcLines: 10318,
+                saveSize: 4, // Número de personajes en el capítulo 1
+                flagCount: 9999
+            },
+            2: {
+                pcLines: 3055,
+                saveSize: 5, // Número de personajes en el capítulo 2 (incluye a Noelle)
+                flagCount: 2500
+            }
+        };
+
+        // Estado de la aplicación
+        let currentChapter = 1;
+        let currentFile = null;
+        let currentFileType = null;
+        let currentFileData = null;
+
+        // Elementos del DOM
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileType = document.getElementById('fileType');
+        const fileSize = document.getElementById('fileSize');
+        const fileChapter = document.getElementById('fileChapter');
+        const convertBtn = document.getElementById('convertBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const resultArea = document.getElementById('resultArea');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const chapterBtns = document.querySelectorAll('.chapter-btn');
+
+        // Event listeners
+        chapterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                chapterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentChapter = parseInt(btn.dataset.chapter);
+                resetUI();
+            });
+        });
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFileSelect);
+        uploadArea.addEventListener('dragover', handleDragOver);
+        uploadArea.addEventListener('dragleave', handleDragLeave);
+        uploadArea.addEventListener('drop', handleDrop);
+        convertBtn.addEventListener('click', convertFile);
+
+        // Funciones de manejo de archivos
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                processFile(file);
+            }
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                processFile(file);
+            }
+        }
+
+        function processFile(file) {
+            currentFile = file;
+            resetUI();
+            showError('');
+
+            // Mostrar información del archivo
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            fileInfo.classList.add('show');
+
+            // Leer el archivo
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const arrayBuffer = e.target.result;
+                const bytes = new Uint8Array(arrayBuffer);
+                
+                // Detectar tipo de archivo
+                detectFileType(bytes, file.name);
+                
+                if (currentFileType) {
+                    fileType.textContent = currentFileType === 'pc' ? 'Save de PC' : 'Save de Switch';
+                    fileChapter.textContent = `Capítulo ${currentChapter}`;
+                    convertBtn.classList.add('show');
+                    
+                    // Guardar los datos para la conversión
+                    if (currentFileType === 'pc') {
+                        const decoder = new TextDecoder('utf-8');
+                        currentFileData = decoder.decode(bytes);
+                    } else {
+                        currentFileData = bytes;
+                    }
+                } else {
+                    showError('No se pudo detectar el tipo de archivo. Asegúrate de que sea un save válido de Deltarune.');
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function detectFileType(bytes, filename) {
+            // Intentar detectar por nombre de archivo
+            if (filename.toLowerCase().includes('.sav')) {
+                currentFileType = 'switch';
+                return;
+            }
+            
+            if (filename.toLowerCase().includes('.ini') || 
+                filename.toLowerCase().includes('filech') ||
+                filename.toLowerCase().includes('chapter')) {
+                currentFileType = 'pc';
+                return;
+            }
+
+            // Detectar por contenido
+            // Los saves de Switch empiezan con un int32 que indica el número de elementos
+            if (bytes.length > 4) {
+                const elementCount = bytes[0] | (bytes[1] << 8) | (bytes[2] << 16) | (bytes[3] << 24);
+                
+                // Verificar si es un número razonable de elementos
+                if (elementCount === CHAPTER_CONFIG[1].pcLines || elementCount === CHAPTER_CONFIG[2].pcLines) {
+                    currentFileType = 'switch';
+                    return;
+                }
+            }
+
+            // Intentar detectar como texto (PC save)
+            try {
+                const decoder = new TextDecoder('utf-8');
+                const text = decoder.decode(bytes.slice(0, 1000)); // Leer primeros 1000 bytes
+                
+                // Los saves de PC tienen líneas separadas
+                if (text.includes('\n') || text.includes('\r')) {
+                    const lines = text.split(/\r?\n/);
+                    if (lines.length > 10) {
+                        currentFileType = 'pc';
+                        return;
+                    }
+                }
+            } catch (e) {
+                // No es texto válido
+            }
+
+            currentFileType = null;
+        }
+
+        function convertFile() {
+            if (!currentFile || !currentFileType || !currentFileData) {
+                showError('No hay archivo para convertir');
+                return;
+            }
+
+            convertBtn.disabled = true;
+            progressBar.classList.add('show');
+            progressFill.style.width = '0%';
+
+            setTimeout(() => {
+                try {
+                    let convertedData;
+                    let newFileName;
+
+                    if (currentFileType === 'pc') {
+                        // Convertir de PC a Switch
+                        convertedData = convertPCToSwitch(currentFileData);
+                        newFileName = currentFile.name.replace(/\.(ini|txt)$/i, '') + '_switch.sav';
+                    } else {
+                        // Convertir de Switch a PC
+                        convertedData = convertSwitchToPC(currentFileData);
+                        newFileName = currentFile.name.replace(/\.sav$/i, '') + '_pc.ini';
+                    }
+
+                    // Simular progreso
+                    animateProgress(() => {
+                        // Crear blob y URL de descarga
+                        const blob = new Blob([convertedData], { 
+                            type: currentFileType === 'pc' ? 'application/octet-stream' : 'text/plain' 
+                        });
+                        const url = URL.createObjectURL(blob);
+
+                        downloadBtn.href = url;
+                        downloadBtn.download = newFileName;
+                        
+                        resultArea.classList.add('show');
+                        convertBtn.disabled = false;
+                        progressBar.classList.remove('show');
+                    });
+
+                } catch (error) {
+                    showError('Error durante la conversión: ' + error.message);
+                    convertBtn.disabled = false;
+                    progressBar.classList.remove('show');
+                }
+            }, 100);
+        }
+
+        function convertPCToSwitch(pcData) {
+            const lines = pcData.split(/\r?\n/).filter(line => line.length > 0);
+            const expectedLines = CHAPTER_CONFIG[currentChapter].pcLines;
+
+            if (lines.length !== expectedLines) {
+                throw new Error(`El archivo debe tener exactamente ${expectedLines} líneas, pero tiene ${lines.length}`);
+            }
+
+            const encoder = new GMSListEncoder();
+            
+            // Procesar cada línea según el capítulo
+            if (currentChapter === 1) {
+                processChapter1PCToSwitch(lines, encoder);
+            } else {
+                processChapter2PCToSwitch(lines, encoder);
+            }
+
+            return encoder.toBytes();
+        }
+
+        function convertSwitchToPC(switchData) {
+            const decoder = new GMSListDecoder(switchData);
+            const values = decoder.decode();
+
+            const expectedValues = CHAPTER_CONFIG[currentChapter].pcLines;
+            if (values.length !== expectedValues) {
+                throw new Error(`El archivo debe tener exactamente ${expectedValues} valores, pero tiene ${values.length}`);
+            }
+
+            const lines = [];
+            
+            // Procesar cada valor según el capítulo
+            if (currentChapter === 1) {
+                processChapter1SwitchToPC(values, lines);
+            } else {
+                processChapter2SwitchToPC(values, lines);
+            }
+
+            return lines.join('\r\n');
+        }
+
+        // Procesamiento específico del Capítulo 1
+        function processChapter1PCToSwitch(lines, encoder) {
+            let lineIndex = 0;
+
+            // truename
+            encoder.addString(lines[lineIndex++]);
+
+            // othername[0..5]
+            const othernames = [];
+            for (let i = 0; i < 6; i++) {
+                othernames.push(lines[lineIndex++]);
+            }
+            encoder.addList(othernames.map(name => ({ type: 1, value: name })));
+
+            // Char[0..2]
+            for (let i = 0; i < 3; i++) {
+                encoder.addReal(parseFloat(lines[lineIndex++]));
+            }
+
+            // Variables simples
+            encoder.addReal(parseFloat(lines[lineIndex++])); // gold
+            encoder.addReal(parseFloat(lines[lineIndex++])); // xp
+            encoder.addReal(parseFloat(lines[lineIndex++])); // lv
+            encoder.addReal(parseFloat(lines[lineIndex++])); // inv
+            encoder.addReal(parseFloat(lines[lineIndex++])); // invc
+            encoder.addReal(parseFloat(lines[lineIndex++])); // darkzone
+
+            // Arrays de stats (hp, maxhp, at, df, mag, guts, charweapon, chararmor1, chararmor2)
+            const statArrays = ['hp', 'maxhp', 'at', 'df', 'mag', 'guts', 'charweapon', 'chararmor1', 'chararmor2'];
+            for (const stat of statArrays) {
+                const values = [];
+                for (let i = 0; i < 4; i++) {
+                    values.push({ type: 0, value: parseFloat(lines[lineIndex++]) });
+                }
+                encoder.addList(values);
+            }
+
+            // weaponstyle
+            const weaponstyles = [];
+            for (let i = 0; i < 4; i++) {
+                weaponstyles.push({ type: 1, value: lines[lineIndex++] });
+            }
+            encoder.addList(weaponstyles);
+
+            // Matrices de items (itemat, itemdf, itemmag, itembolts, itemgrazeamt, itemgrazesize, itemboltspeed, itemspecial)
+            const itemMatrices = ['itemat', 'itemdf', 'itemmag', 'itembolts', 'itemgrazeamt', 'itemgrazesize', 'itemboltspeed', 'itemspecial'];
+            for (let i = 0; i < 4; i++) {
+                for (const matrix of itemMatrices) {
+                    for (let j = 0; j < 4; j++) {
+                        encoder.addReal(parseFloat(lines[lineIndex++]));
+                    }
+                }
+                // spell array para cada personaje
+                for (let j = 0; j < 12; j++) {
+                    encoder.addReal(parseFloat(lines[lineIndex++]));
+                }
+            }
+
+            // Resto de variables simples
+            encoder.addReal(parseFloat(lines[lineIndex++])); // boltspeed
+            encoder.addReal(parseFloat(lines[lineIndex++])); // grazeamt
+            encoder.addReal(parseFloat(lines[lineIndex++])); // grazesize
+
+            // Arrays de items
+            const itemArrays = ['item', 'keyitem', 'weapon', 'armor'];
+            for (const arr of itemArrays) {
+                const values = [];
+                for (let i = 0; i < 13; i++) {
+                    values.push({ type: 0, value: parseFloat(lines[lineIndex++]) });
+                }
+                encoder.addList(values);
+            }
+
+            // Más variables simples
+            const simpleVars = ['tension', 'maxtension', 'lweapon', 'larmor', 'lxp', 'llv', 'lgold', 'lhp', 'lmaxhp', 'lat', 'ldf', 'lwstrength', 'ladef'];
+            for (const varName of simpleVars) {
+                encoder.addReal(parseFloat(lines[lineIndex++]));
+            }
+
+            // litem y phone arrays
+            for (let arr = 0; arr < 2; arr++) {
+                const values = [];
+                for (let i = 0; i < 8; i++) {
+                    values.push({ type: 0, value: parseFloat(lines[lineIndex++]) });
+                }
+                encoder.addList(values);
+            }
+
+            // flag array (9999 elementos)
+            const flags = [];
+            for (let i = 0; i < 9999; i++) {
+                flags.push({ type: 0, value: parseFloat(lines[lineIndex++]) });
+            }
+            encoder.addList(flags);
+
+            // Últimas variables
+            encoder.addReal(parseFloat(lines[lineIndex++])); // plot
+            encoder.addReal(parseFloat(lines[lineIndex++])); // currentroom
+            encoder.addReal(parseFloat(lines[lineIndex++])); // time
+        }
+
+        function processChapter2PCToSwitch(lines, encoder) {
+            let lineIndex = 0;
+
+            // truename
+            encoder.addString(lines[lineIndex++]);
+
+            // othername[0..5]
+            const othernames = [];
+            for (let i = 0; i < 6; i++) {
+                othernames.push(lines[lineIndex++]);
+            }
+            encoder.addList(othernames.map(name => ({ type: 1, value: name })));
+
+            // Char[0..2]
+            for (let i = 0; i < 3; i++) {
+                encoder.addReal(parseFloat(lines[lineIndex++]));
+            }
+
+            // Variables simples
+            encoder.addReal(parseFloat(lines[lineIndex++])); // gold
+            encoder.addReal(parseFloat(lines[lineIndex++])); // xp
+            encoder.addReal(parseFloat(lines[lineIndex++])); // lv
+            encoder.addReal(parseFloat(lines[lineIndex++])); // inv
+            encoder.addReal(parseFloat(lines[lineIndex++])); // invc
+            encoder.addReal(parseFloat(lines[lineIndex++])); // darkzone
+
+            // Arrays de stats (5 personajes en cap 2)
+            const statArrays = ['hp', 'maxhp', 'at', 'df', 'mag', 'guts', 'charweapon', 'chararmor1', 'chararmor2'];
+            for (const stat of statArrays) {
+                const values = [];
+                for (let i = 0; i < 5; i++) {
+                    values.push({ type: 0, value: parseFloat(lines[lineIndex++]) });
+                }
+                encoder.addList(values);
+            }
+
+            // weaponstyle
+            const weaponstyles = [];
+            for (let i = 0; i < 5; i++) {
+                weaponstyles.push({ type: 1, value: lines[lineIndex++] });
+            }
+            encoder.addList(weaponstyles);
+
+            // Matrices de items (ahora con itemelement e itemelementamount adicionales)
+            const itemMatrices = ['itemat', 'itemdf', 'itemmag', 'itembolts', 'itemgrazeamt', 'itemgrazesize', 'itemboltspeed', 'itemspecial', 'itemelement', 'itemelementamount'];
+            for (let i = 0; i < 5; i++) {
+                for (const matrix of itemMatrices) {
+                    for (let j = 0; j < 4; j++) {
+                        encoder.addReal(parseFloat(lines[lineIndex++]));
+                    }
+                }
+                // spell array para cada personaje
+                for (let j = 0; j < 12; j++) {
+                    encoder.addReal(parseFloat(lines[lineIndex++]));
+                }
+            }
+
+            // Resto de variables simples
+            encoder.addReal(parseFloat(lines[lineIndex++])); // boltspeed
+            encoder.addReal(parseFloat(lines[lineIndex++])); // grazeamt
+            encoder.addReal(parseFloat(lines[lineIndex++])); // grazesize
+
+            // Arrays de items
+            const itemArrays = ['item', 'keyitem'];
+            for (const arr of itemArrays) {
+                const values = [];
+                for (let i = 0; i < 13; i++) {
+                    values.push({ type: 0, value: parseFloat(lines[lineIndex++]) });
+                }
+                encoder.addList(values);
+            }
+
+            // weapon y armor arrays (48 elementos cada uno)
+            for (let arr = 0; arr < 2; arr++) {
+                const values = [];
+                for (let i = 0; i < 48; i++) {
+                    values.push({ type: 0, value: parseFloat(lines[lineIndex++]) });
+                }
+                encoder.addList(values);
+            }
+
+            // pocketitem array (72 elementos)
+            const pocketitems = [];
+            for (let i = 0; i < 72; i++) {
+                pocketitems.push({ type: 0, value: parseFloat(lines[lineIndex++]) });
+            }
+            encoder.addList(pocketitems);
+
+            // Más variables simples
+            const simpleVars = ['tension', 'maxtension', 'lweapon', 'larmor', 'lxp', 'llv', 'lgold', 'lhp', 'lmaxhp', 'lat', 'ldf', 'lwstrength', 'ladef'];
+            for (const varName of simpleVars) {
+                encoder.addReal(parseFloat(lines[lineIndex++]));
+            }
+
+            // litem y phone arrays
+            for (let arr = 0; arr < 2; arr++) {
+                const values = [];
+                for (let i = 0; i < 8; i++) {
+                    values.push({ type: 0, value: parseFloat(lines[lineIndex++]) });
+                }
+                encoder.addList(values);
+            }
+
+            // flag array (2500 elementos en cap 2)
+            const flags = [];
+            for (let i = 0; i < 2500; i++) {
+                flags.push({ type: 0, value: parseFloat(lines[lineIndex++]) });
+            }
+            encoder.addList(flags);
+
+            // Últimas variables
+            encoder.addReal(parseFloat(lines[lineIndex++])); // plot
+            encoder.addReal(parseFloat(lines[lineIndex++])); // currentroom
+            encoder.addReal(parseFloat(lines[lineIndex++])); // time
+        }
+
+        function processChapter1SwitchToPC(values, lines) {
+            let valueIndex = 0;
+
+            // truename
+            lines.push(values[valueIndex++].value);
+
+            // othername[0..5]
+            const othernames = values[valueIndex++].value;
+            for (let i = 0; i < 6; i++) {
+                lines.push(othernames[i].value);
+            }
+
+            // Char[0..2]
+            for (let i = 0; i < 3; i++) {
+                lines.push(values[valueIndex++].value.toString());
+            }
+
+            // Variables simples
+            lines.push(values[valueIndex++].value.toString()); // gold
+            lines.push(values[valueIndex++].value.toString()); // xp
+            lines.push(values[valueIndex++].value.toString()); // lv
+            lines.push(values[valueIndex++].value.toString()); // inv
+            lines.push(values[valueIndex++].value.toString()); // invc
+            lines.push(values[valueIndex++].value.toString()); // darkzone
+
+            // Arrays de stats
+            const statArrays = ['hp', 'maxhp', 'at', 'df', 'mag', 'guts', 'charweapon', 'chararmor1', 'chararmor2'];
+            for (const stat of statArrays) {
+                const arr = values[valueIndex++].value;
+                for (let i = 0; i < 4; i++) {
+                    lines.push(arr[i].value.toString());
+                }
+            }
+
+            // weaponstyle
+            const weaponstyles = values[valueIndex++].value;
+            for (let i = 0; i < 4; i++) {
+                lines.push(weaponstyles[i].value);
+            }
+
+            // Matrices de items y spells
+            for (let i = 0; i < 4; i++) {
+                const itemMatrices = ['itemat', 'itemdf', 'itemmag', 'itembolts', 'itemgrazeamt', 'itemgrazesize', 'itemboltspeed', 'itemspecial'];
+                for (const matrix of itemMatrices) {
+                    for (let j = 0; j < 4; j++) {
+                        lines.push(values[valueIndex++].value.toString());
+                    }
+                }
+                // spell array
+                for (let j = 0; j < 12; j++) {
+                    lines.push(values[valueIndex++].value.toString());
+                }
+            }
+
+            // Resto de variables simples
+            lines.push(values[valueIndex++].value.toString()); // boltspeed
+            lines.push(values[valueIndex++].value.toString()); // grazeamt
+            lines.push(values[valueIndex++].value.toString()); // grazesize
+
+            // Arrays de items
+            const itemArrays = ['item', 'keyitem', 'weapon', 'armor'];
+            for (const arr of itemArrays) {
+                const array = values[valueIndex++].value;
+                for (let i = 0; i < 13; i++) {
+                    lines.push(array[i].value.toString());
+                }
+            }
+
+            // Más variables simples
+            const simpleVars = ['tension', 'maxtension', 'lweapon', 'larmor', 'lxp', 'llv', 'lgold', 'lhp', 'lmaxhp', 'lat', 'ldf', 'lwstrength', 'ladef'];
+            for (const varName of simpleVars) {
+                lines.push(values[valueIndex++].value.toString());
+            }
+
+            // litem y phone arrays
+            for (let arr = 0; arr < 2; arr++) {
+                const array = values[valueIndex++].value;
+                for (let i = 0; i < 8; i++) {
+                    lines.push(array[i].value.toString());
+                }
+            }
+
+            // flag array
+            const flags = values[valueIndex++].value;
+            for (let i = 0; i < 9999; i++) {
+                lines.push(flags[i].value.toString());
+            }
+
+            // Últimas variables
+            lines.push(values[valueIndex++].value.toString()); // plot
+            lines.push(values[valueIndex++].value.toString()); // currentroom
+            lines.push(values[valueIndex++].value.toString()); // time
+        }
+
+        function processChapter2SwitchToPC(values, lines) {
+            let valueIndex = 0;
+
+            // truename
+            lines.push(values[valueIndex++].value);
+
+            // othername[0..5]
+            const othernames = values[valueIndex++].value;
+            for (let i = 0; i < 6; i++) {
+                lines.push(othernames[i].value);
+            }
+
+            // Char[0..2]
+            for (let i = 0; i < 3; i++) {
+                lines.push(values[valueIndex++].value.toString());
+            }
+
+            // Variables simples
+            lines.push(values[valueIndex++].value.toString()); // gold
+            lines.push(values[valueIndex++].value.toString()); // xp
+            lines.push(values[valueIndex++].value.toString()); // lv
+            lines.push(values[valueIndex++].value.toString()); // inv
+            lines.push(values[valueIndex++].value.toString()); // invc
+            lines.push(values[valueIndex++].value.toString()); // darkzone
+
+            // Arrays de stats (5 personajes)
+            const statArrays = ['hp', 'maxhp', 'at', 'df', 'mag', 'guts', 'charweapon', 'chararmor1', 'chararmor2'];
+            for (const stat of statArrays) {
+                const arr = values[valueIndex++].value;
+                for (let i = 0; i < 5; i++) {
+                    lines.push(arr[i].value.toString());
+                }
+            }
+
+            // weaponstyle
+            const weaponstyles = values[valueIndex++].value;
+            for (let i = 0; i < 5; i++) {
+                lines.push(weaponstyles[i].value);
+            }
+
+            // Matrices de items y spells
+            for (let i = 0; i < 5; i++) {
+                const itemMatrices = ['itemat', 'itemdf', 'itemmag', 'itembolts', 'itemgrazeamt', 'itemgrazesize', 'itemboltspeed', 'itemspecial', 'itemelement', 'itemelementamount'];
+                for (const matrix of itemMatrices) {
+                    for (let j = 0; j < 4; j++) {
+                        lines.push(values[valueIndex++].value.toString());
+                    }
+                }
+                // spell array
+                for (let j = 0; j < 12; j++) {
+                    lines.push(values[valueIndex++].value.toString());
+                }
+            }
+
+            // Resto de variables simples
+            lines.push(values[valueIndex++].value.toString()); // boltspeed
+            lines.push(values[valueIndex++].value.toString()); // grazeamt
+            lines.push(values[valueIndex++].value.toString()); // grazesize
+
+            // Arrays de items
+            const itemArrays = ['item', 'keyitem'];
+            for (const arr of itemArrays) {
+                const array = values[valueIndex++].value;
+                for (let i = 0; i < 13; i++) {
+                    lines.push(array[i].value.toString());
+                }
+            }
+
+            // weapon y armor arrays (48 elementos)
+            for (let arr = 0; arr < 2; arr++) {
+                const array = values[valueIndex++].value;
+                for (let i = 0; i < 48; i++) {
+                    lines.push(array[i].value.toString());
+                }
+            }
+
+            // pocketitem array
+            const pocketitems = values[valueIndex++].value;
+            for (let i = 0; i < 72; i++) {
+                lines.push(pocketitems[i].value.toString());
+            }
+
+            // Más variables simples
+            const simpleVars = ['tension', 'maxtension', 'lweapon', 'larmor', 'lxp', 'llv', 'lgold', 'lhp', 'lmaxhp', 'lat', 'ldf', 'lwstrength', 'ladef'];
+            for (const varName of simpleVars) {
+                lines.push(values[valueIndex++].value.toString());
+            }
+
+            // litem y phone arrays
+            for (let arr = 0; arr < 2; arr++) {
+                const array = values[valueIndex++].value;
+                for (let i = 0; i < 8; i++) {
+                    lines.push(array[i].value.toString());
+                }
+            }
+
+            // flag array (2500 elementos)
+            const flags = values[valueIndex++].value;
+            for (let i = 0; i < 2500; i++) {
+                lines.push(flags[i].value.toString());
+            }
+
+            // Últimas variables
+            lines.push(values[valueIndex++].value.toString()); // plot
+            lines.push(values[valueIndex++].value.toString()); // currentroom
+            lines.push(values[valueIndex++].value.toString()); // time
+        }
+
+        // Clase para codificar GMS Lists
+        class GMSListEncoder {
+            constructor() {
+                this.values = [];
+            }
+
+            addReal(value) {
+                this.values.push({ type: 0, value: value });
+            }
+
+            addString(value) {
+                this.values.push({ type: 1, value: value });
+            }
+
+            addList(values) {
+                this.values.push({ type: 2, value: values });
+            }
+
+            toBytes() {
+                const buffer = [];
+                
+                // Escribir número de elementos
+                const count = this.values.length;
+                buffer.push(count & 0xFF);
+                buffer.push((count >> 8) & 0xFF);
+                buffer.push((count >> 16) & 0xFF);
+                buffer.push((count >> 24) & 0xFF);
+
+                // Escribir cada valor
+                for (const item of this.values) {
+                    this.encodeValue(item, buffer);
+                }
+
+                return new Uint8Array(buffer);
+            }
+
+            encodeValue(item, buffer) {
+                buffer.push(item.type);
+
+                switch (item.type) {
+                    case 0: // Real
+                        const floatArray = new Float64Array([item.value]);
+                        const bytes = new Uint8Array(floatArray.buffer);
+                        for (let i = 0; i < 8; i++) {
+                            buffer.push(bytes[i]);
+                        }
+                        break;
+
+                    case 1: // String
+                        const strBytes = new TextEncoder().encode(item.value);
+                        // Escribir longitud
+                        const len = strBytes.length;
+                        buffer.push(len & 0xFF);
+                        buffer.push((len >> 8) & 0xFF);
+                        buffer.push((len >> 16) & 0xFF);
+                        buffer.push((len >> 24) & 0xFF);
+                        // Escribir bytes
+                        for (const byte of strBytes) {
+                            buffer.push(byte);
+                        }
+                        break;
+
+                    case 2: // List
+                        // Escribir número de elementos
+                        const listCount = item.value.length;
+                        buffer.push(listCount & 0xFF);
+                        buffer.push((listCount >> 8) & 0xFF);
+                        buffer.push((listCount >> 16) & 0xFF);
+                        buffer.push((listCount >> 24) & 0xFF);
+                        // Escribir cada elemento
+                        for (const subItem of item.value) {
+                            this.encodeValue(subItem, buffer);
+                        }
+                        break;
+                }
+            }
+        }
+
+        // Clase para decodificar GMS Lists
+        class GMSListDecoder {
+            constructor(bytes) {
+                this.bytes = bytes;
+                this.position = 0;
+            }
+
+            decode() {
+                const count = this.readInt32();
+                const values = [];
+
+                for (let i = 0; i < count; i++) {
+                    values.push(this.readValue());
+                }
+
+                return values;
+            }
+
+            readValue() {
+                const type = this.bytes[this.position++];
+
+                switch (type) {
+                    case 0: // Real
+                        return { type: 0, value: this.readFloat64() };
+
+                    case 1: // String
+                        const len = this.readInt32();
+                        const strBytes = this.bytes.slice(this.position, this.position + len);
+                        this.position += len;
+                        return { type: 1, value: new TextDecoder().decode(strBytes) };
+
+                    case 2: // List
+                        const count = this.readInt32();
+                        const list = [];
+                        for (let i = 0; i < count; i++) {
+                            list.push(this.readValue());
+                        }
+                        return { type: 2, value: list };
+
+                    default:
+                        throw new Error(`Tipo de valor desconocido: ${type}`);
+                }
+            }
+
+            readInt32() {
+                const value = this.bytes[this.position] |
+                    (this.bytes[this.position + 1] << 8) |
+                    (this.bytes[this.position + 2] << 16) |
+                    (this.bytes[this.position + 3] << 24);
+                this.position += 4;
+                return value;
+            }
+
+            readFloat64() {
+                const bytes = this.bytes.slice(this.position, this.position + 8);
+                this.position += 8;
+                const floatArray = new Float64Array(bytes.buffer, bytes.byteOffset, 1);
+                return floatArray[0];
+            }
+        }
+
+        // Funciones de utilidad
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' bytes';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+        }
+
+        function animateProgress(callback) {
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                progressFill.style.width = progress + '%';
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    callback();
+                }
+            }, 50);
+        }
+
+        function showError(message) {
+            if (message) {
+                errorMessage.textContent = message;
+                errorMessage.classList.add('show');
+            } else {
+                errorMessage.classList.remove('show');
+            }
+        }
+
+        function resetUI() {
+            fileInfo.classList.remove('show');
+            convertBtn.classList.remove('show');
+            progressBar.classList.remove('show');
+            resultArea.classList.remove('show');
+            errorMessage.classList.remove('show');
+            currentFile = null;
+            currentFileType = null;
+            currentFileData = null;
+        }
+    </script>
+</body>
+</html>
