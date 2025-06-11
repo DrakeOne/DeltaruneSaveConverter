@@ -1,1 +1,165 @@
-a
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Deltarune Save Converter (Switch <-> PC, Ch1-Ch4+)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; background: #181c24; color: #eee; margin: 0; padding: 0; }
+    .container { max-width: 800px; margin: 40px auto; background: #23283a; border-radius: 12px; box-shadow: 0 2px 16px #0008; padding: 32px; }
+    h1 { text-align: center; }
+    .file-input { margin: 24px 0; }
+    .actions { display: flex; gap: 16px; justify-content: center; margin-bottom: 24px; }
+    .actions button { padding: 12px 24px; font-size: 1.1em; border-radius: 6px; border: none; background: #3a7bd5; color: #fff; cursor: pointer; transition: background 0.2s; }
+    .actions button:hover { background: #285a9c; }
+    .output { margin-top: 32px; background: #1a1e2a; border-radius: 8px; padding: 16px; min-height: 80px; }
+    .slot-list { margin: 16px 0; }
+    .slot-list table { width: 100%; border-collapse: collapse; }
+    .slot-list th, .slot-list td { border: 1px solid #444; padding: 6px 10px; text-align: left; }
+    .slot-list th { background: #2a2e3a; }
+    .slot-list tr:nth-child(even) { background: #23283a; }
+    .hidden { display: none; }
+    .error { color: #ff6a6a; }
+    .success { color: #6aff6a; }
+    .note { color: #aaa; font-size: 0.95em; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Deltarune Save Converter<br><span style="font-size:0.6em; font-weight:normal;">Switch <-> PC (Ch1, Ch2, Ch3, Ch4+)</span></h1>
+  <div class="file-input">
+    <label for="fileInput">Cargar archivo(s) de save (.sav Switch o .txt PC):</label><br>
+    <input type="file" id="fileInput" multiple>
+  </div>
+  <div class="actions">
+    <button id="toPC">Convertir a PC</button>
+    <button id="toSwitch">Convertir a Switch</button>
+  </div>
+  <div class="slot-list hidden" id="slotList"></div>
+  <div class="output" id="output"></div>
+</div>
+<script>
+// --- Utilidades de GMSList ---
+function decodeGMSList(hex, type, length) {
+  if (!hex.startsWith('2E010000') && !hex.startsWith('2F010000')) throw new Error('No es GMSList');
+  const bytes = new Uint8Array(hex.match(/../g).map(b => parseInt(b, 16)));
+  let pos = 8, arr = [];
+  for (let i = 0; i < length; i++) {
+    const t = bytes[pos]; pos += 4;
+    if (t === 0) {
+      const dv = new DataView(bytes.buffer, pos, 8);
+      arr.push(dv.getFloat64(0, true));
+      pos += 8;
+    } else if (t === 1) {
+      const len = new DataView(bytes.buffer, pos, 4).getInt32(0, true);
+      pos += 4;
+      let s = '';
+      for (let j = 0; j < len; j++) s += String.fromCharCode(bytes[pos++]);
+      arr.push(s);
+    }
+  }
+  return arr;
+}
+function encodeGMSList(arr, type) {
+  let out = [0x2F, 0x01, 0x00, 0x00];
+  out.push(arr.length, 0, 0, 0);
+  for (let v of arr) {
+    if (type === 'real') {
+      out.push(0, 0, 0, 0);
+      const f = new Float64Array([v]);
+      out.push(...new Uint8Array(f.buffer));
+    } else {
+      out.push(1, 0, 0, 0);
+      out.push(v.length, 0, 0, 0);
+      for (let i = 0; i < v.length; i++) out.push(v.charCodeAt(i));
+    }
+  }
+  return Array.from(out).map(b => b.toString(16).padStart(2,'0')).join('').toUpperCase();
+}
+function detectFormat(files) {
+  let isSwitch = false, isPC = false, slots = [];
+  for (let f of files) {
+    if (f.name.endsWith('.sav')) isSwitch = true;
+    if (f.name.endsWith('.txt')) isPC = true;
+    if (/filech[1-4]_\d+/.test(f.name)) {
+      const m = f.name.match(/filech(\d+)_(\d+)/);
+      slots.push({chapter: +m[1], slot: +m[2], name: f.name});
+    }
+  }
+  return {isSwitch, isPC, slots};
+}
+async function convert(files, direction) {
+  const output = document.getElementById('output');
+  output.innerHTML = 'Procesando...';
+  let results = [];
+  for (let file of files) {
+    const text = await file.text();
+    if (direction === 'toPC' && file.name.endsWith('.sav')) {
+      let json;
+      try { json = JSON.parse(text.replace(/\0+$/, '')); } catch(e) { output.innerHTML = '<span class="error">Error: Save Switch corrupto o no es JSON</span>'; return; }
+      for (let key in json) {
+        if (/filech[1-4]_\d+/.test(key)) {
+          const lines = json[key].split(/\r?\n/);
+          let expanded = [];
+          for (let l of lines) {
+            if (/^2[EF]010000/.test(l) && l.length > 16) {
+              if (l.length < 100) expanded.push(...decodeGMSList(l, 'string', 6));
+              else if (l.length > 1000) expanded.push(...decodeGMSList(l, 'real', 9999));
+              else expanded.push(...decodeGMSList(l, 'real', 4));
+            } else {
+              expanded.push(l);
+            }
+          }
+          let pcLines = expanded;
+          if (key.startsWith('filech1')) while (pcLines.length < 10318) pcLines.push('0');
+          if (key.startsWith('filech2')) while (pcLines.length < 3055) pcLines.push('0');
+          if (key.startsWith('filech3') || key.startsWith('filech4')) while (pcLines.length < 10318) pcLines.push('0');
+          results.push({name: key + '.txt', content: pcLines.join('\n')});
+        }
+      }
+    } else if (direction === 'toSwitch' && file.name.endsWith('.txt')) {
+      const lines = text.split(/\r?\n/);
+      let out = [];
+      let i = 0;
+      out.push(lines[i++]);
+      out.push(encodeGMSList(lines.slice(i, i+6), 'string')); i += 6;
+      out.push(...lines.slice(i, i+3)); i += 3;
+      out.push(...lines.slice(i, i+8)); i += 8;
+      for (let j = 0; j < 10; j++) {
+        out.push(encodeGMSList(lines.slice(i, i+4), j === 9 ? 'string' : 'real'));
+        i += 4;
+      }
+      while (i < lines.length) out.push(lines[i++]);
+      results.push({name: file.name.replace(/\.txt$/, ''), content: out.join('\r\n')});
+    }
+  }
+  output.innerHTML = '<span class="success">Conversión completada. Descarga los archivos abajo:</span><br>' +
+    results.map(r => `<a download="${r.name}" href="data:text/plain;base64,${btoa(r.content)}">${r.name}</a>`).join('<br>');
+}
+const fileInput = document.getElementById('fileInput');
+const toPC = document.getElementById('toPC');
+const toSwitch = document.getElementById('toSwitch');
+fileInput.addEventListener('change', () => {
+  const files = Array.from(fileInput.files);
+  const {isSwitch, isPC, slots} = detectFormat(files);
+  const slotList = document.getElementById('slotList');
+  if (slots.length) {
+    slotList.classList.remove('hidden');
+    slotList.innerHTML = '<b>Slots detectados:</b><table><tr><th>Archivo</th><th>Capítulo</th><th>Slot</th></tr>' +
+      slots.map(s => `<tr><td>${s.name}</td><td>${s.chapter}</td><td>${s.slot}</td></tr>`).join('') + '</table>';
+  } else {
+    slotList.classList.add('hidden');
+    slotList.innerHTML = '';
+  }
+});
+toPC.addEventListener('click', () => {
+  const files = Array.from(fileInput.files);
+  convert(files, 'toPC');
+});
+toSwitch.addEventListener('click', () => {
+  const files = Array.from(fileInput.files);
+  convert(files, 'toSwitch');
+});
+</script>
+</body>
+</html>
