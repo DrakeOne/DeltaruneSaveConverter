@@ -1247,14 +1247,15 @@
     // =============================================================
     // === NUEVOS CONVERSORES PARA CAPÍTULOS 3 Y 4
     // =============================================================
-
-    // Base class for Ch3 and Ch4 as they are very similar
+    
+    // Base class for Ch3 and Ch4 as they have a similar, expanded structure.
     class DeltaruneCh3And4_BaseConverter {
         constructor(flagCount = 5000) { 
             this.initializeData(flagCount);
         }
         
         initializeData(flagCount) {
+            // Player and party info
             this.truename = "";
             this.othername = new Array(6).fill("");
             this.char = new Array(3).fill(0);
@@ -1264,43 +1265,46 @@
             this.inv = 0;
             this.invc = 0;
             this.darkzone = 0;
-            
+            this.new_currency = 0; // New currency found in Ch3+
+
+            // Character stats block
             const charCount = 5;
-            this.hp = new Array(charCount).fill(0);
-            this.maxhp = new Array(charCount).fill(0);
-            this.at = new Array(charCount).fill(0);
-            this.df = new Array(charCount).fill(0);
-            this.mag = new Array(charCount).fill(0);
-            this.guts = new Array(charCount).fill(0);
-            this.charweapon = new Array(charCount).fill(0);
-            this.chararmor1 = new Array(charCount).fill(0);
-            this.chararmor2 = new Array(charCount).fill(0);
-            this.weaponstyle = new Array(charCount).fill("");
-            
-            this.itemat = Array(charCount).fill(null).map(() => new Array(4).fill(0));
-            this.itemdf = Array(charCount).fill(null).map(() => new Array(4).fill(0));
-            this.itemmag = Array(charCount).fill(null).map(() => new Array(4).fill(0));
-            this.itembolts = Array(charCount).fill(null).map(() => new Array(4).fill(0));
-            this.itemgrazeamt = Array(charCount).fill(null).map(() => new Array(4).fill(0));
-            this.itemgrazesize = Array(charCount).fill(null).map(() => new Array(4).fill(0));
-            this.itemboltspeed = Array(charCount).fill(null).map(() => new Array(4).fill(0));
-            this.itemspecial = Array(charCount).fill(null).map(() => new Array(4).fill(0));
-            this.itemelement = Array(charCount).fill(null).map(() => new Array(4).fill(0));
-            this.itemelementamount = Array(charCount).fill(null).map(() => new Array(4).fill(0));
-            
-            this.spell = Array(charCount).fill(null).map(() => new Array(12).fill(0));
+            this.char_stats = Array(charCount).fill(null).map(() => ({
+                hp: 0,
+                maxhp: 0,
+                at: 0,
+                df: 0,
+                mag: 0,
+                guts: 0,
+                charweapon: 0,
+                chararmor1: 0,
+                chararmor2: 0,
+                weaponstyle: "",
+                itemat: new Array(4).fill(0),
+                itemdf: new Array(4).fill(0),
+                itemmag: new Array(4).fill(0),
+                itembolts: new Array(4).fill(0),
+                itemgrazeamt: new Array(4).fill(0),
+                itemgrazesize: new Array(4).fill(0),
+                itemboltspeed: new Array(4).fill(0),
+                itemspecial: new Array(4).fill(0),
+                itemelement: new Array(4).fill(0),
+                itemelementamount: new Array(4).fill(0),
+                spell: new Array(12).fill(0)
+            }));
             
             this.boltspeed = 0;
             this.grazeamt = 0;
             this.grazesize = 0;
             
+            // Inventories
             this.item = new Array(13).fill(0);
             this.keyitem = new Array(13).fill(0);
-            
             this.weapon = new Array(96).fill(0);
             this.armor = new Array(96).fill(0);
             this.pocketitem = new Array(96).fill(0);
             
+            // Light world stats
             this.tension = 0;
             this.maxtension = 0;
             this.lweapon = 0;
@@ -1327,51 +1331,64 @@
             this.new_vars = [];
         }
 
-        _read(lines, flagCount) {
-             let line = 0;
+        readFromConsole(lines, flagCount) {
+            let line = 0;
             
+            // General Info
             this.truename = lines[line++] || "";
             this.othername = new GMSListDecoder(lines[line++]).toStringArray(6);
-            
             for (let i = 0; i < 3; i++) this.char[i] = parseFloat(lines[line++]) || 0;
-            
             this.gold = parseFloat(lines[line++]) || 0;
             this.xp = parseFloat(lines[line++]) || 0;
             this.lv = parseFloat(lines[line++]) || 0;
             this.inv = parseFloat(lines[line++]) || 0;
             this.invc = parseFloat(lines[line++]) || 0;
             this.darkzone = parseFloat(lines[line++]) || 0;
-            
+            this.new_currency = parseFloat(lines[line++]) || 0;
+
+            // Character Stats from GMSList
             const charCount = 5;
-            this.hp = new GMSListDecoder(lines[line++]).toRealArray(charCount);
-            this.maxhp = new GMSListDecoder(lines[line++]).toRealArray(charCount);
-            this.at = new GMSListDecoder(lines[line++]).toRealArray(charCount);
-            this.df = new GMSListDecoder(lines[line++]).toRealArray(charCount);
-            this.mag = new GMSListDecoder(lines[line++]).toRealArray(charCount);
-            this.guts = new GMSListDecoder(lines[line++]).toRealArray(charCount);
-            this.charweapon = new GMSListDecoder(lines[line++]).toRealArray(charCount);
-            this.chararmor1 = new GMSListDecoder(lines[line++]).toRealArray(charCount);
-            this.chararmor2 = new GMSListDecoder(lines[line++]).toRealArray(charCount);
-            this.weaponstyle = new GMSListDecoder(lines[line++]).toStringArray(charCount);
-            
+            const hpList = new GMSListDecoder(lines[line++]).toRealArray(charCount);
+            const maxhpList = new GMSListDecoder(lines[line++]).toRealArray(charCount);
+            const atList = new GMSListDecoder(lines[line++]).toRealArray(charCount);
+            const dfList = new GMSListDecoder(lines[line++]).toRealArray(charCount);
+            const magList = new GMSListDecoder(lines[line++]).toRealArray(charCount);
+            const gutsList = new GMSListDecoder(lines[line++]).toRealArray(charCount);
+            const charweaponList = new GMSListDecoder(lines[line++]).toRealArray(charCount);
+            const chararmor1List = new GMSListDecoder(lines[line++]).toRealArray(charCount);
+            const chararmor2List = new GMSListDecoder(lines[line++]).toRealArray(charCount);
+            const weaponstyleList = new GMSListDecoder(lines[line++]).toStringArray(charCount);
+
             for (let i = 0; i < charCount; i++) {
+                this.char_stats[i].hp = hpList[i];
+                this.char_stats[i].maxhp = maxhpList[i];
+                this.char_stats[i].at = atList[i];
+                this.char_stats[i].df = dfList[i];
+                this.char_stats[i].mag = magList[i];
+                this.char_stats[i].guts = gutsList[i];
+                this.char_stats[i].charweapon = charweaponList[i];
+                this.char_stats[i].chararmor1 = chararmor1List[i];
+                this.char_stats[i].chararmor2 = chararmor2List[i];
+                this.char_stats[i].weaponstyle = weaponstyleList[i];
+                
                 for (let q = 0; q < 4; q++) {
-                    this.itemat[i][q] = parseFloat(lines[line++]) || 0;
-                    this.itemdf[i][q] = parseFloat(lines[line++]) || 0;
-                    this.itemmag[i][q] = parseFloat(lines[line++]) || 0;
-                    this.itembolts[i][q] = parseFloat(lines[line++]) || 0;
-                    this.itemgrazeamt[i][q] = parseFloat(lines[line++]) || 0;
-                    this.itemgrazesize[i][q] = parseFloat(lines[line++]) || 0;
-                    this.itemboltspeed[i][q] = parseFloat(lines[line++]) || 0;
-                    this.itemspecial[i][q] = parseFloat(lines[line++]) || 0;
-                    this.itemelement[i][q] = parseFloat(lines[line++]) || 0;
-                    this.itemelementamount[i][q] = parseFloat(lines[line++]) || 0;
+                    this.char_stats[i].itemat[q] = parseFloat(lines[line++]) || 0;
+                    this.char_stats[i].itemdf[q] = parseFloat(lines[line++]) || 0;
+                    this.char_stats[i].itemmag[q] = parseFloat(lines[line++]) || 0;
+                    this.char_stats[i].itembolts[q] = parseFloat(lines[line++]) || 0;
+                    this.char_stats[i].itemgrazeamt[q] = parseFloat(lines[line++]) || 0;
+                    this.char_stats[i].itemgrazesize[q] = parseFloat(lines[line++]) || 0;
+                    this.char_stats[i].itemboltspeed[q] = parseFloat(lines[line++]) || 0;
+                    this.char_stats[i].itemspecial[q] = parseFloat(lines[line++]) || 0;
+                    this.char_stats[i].itemelement[q] = parseFloat(lines[line++]) || 0;
+                    this.char_stats[i].itemelementamount[q] = parseFloat(lines[line++]) || 0;
                 }
                 for (let j = 0; j < 12; j++) {
-                    this.spell[i][j] = parseFloat(lines[line++]) || 0;
+                    this.char_stats[i].spell[j] = parseFloat(lines[line++]) || 0;
                 }
             }
             
+            // ... rest of the file
             this.boltspeed = parseFloat(lines[line++]) || 0;
             this.grazeamt = parseFloat(lines[line++]) || 0;
             this.grazesize = parseFloat(lines[line++]) || 0;
@@ -1403,148 +1420,60 @@
             this.plot = parseFloat(lines[line++]) || 0;
             this.currentroom = parseFloat(lines[line++]) || 0;
             this.time = parseFloat(lines[line++]) || 0;
-            
-            while(line < lines.length && lines[line] !== undefined && lines[line] !== "") {
-                this.new_vars.push(lines[line++]);
-            }
         }
 
-        _writePC(flagCount) {
-            const lines = [];
-            
-            lines.push(this.truename);
-            this.othername.forEach(name => lines.push(name));
-            this.char.forEach(c => lines.push(c.toString()));
-            
-            lines.push(this.gold.toString());
-            lines.push(this.xp.toString());
-            lines.push(this.lv.toString());
-            lines.push(this.inv.toString());
-            lines.push(this.invc.toString());
-            lines.push(this.darkzone.toString());
-            
-            const charCount = 5;
-            for (let i = 0; i < charCount; i++) {
-                lines.push((this.hp[i] || 0).toString());
-                lines.push((this.maxhp[i] || 0).toString());
-                lines.push((this.at[i] || 0).toString());
-                lines.push((this.df[i] || 0).toString());
-                lines.push((this.mag[i] || 0).toString());
-                lines.push((this.guts[i] || 0).toString());
-                lines.push((this.charweapon[i] || 0).toString());
-                lines.push((this.chararmor1[i] || 0).toString());
-                lines.push((this.chararmor2[i] || 0).toString());
-                lines.push(this.weaponstyle[i] || "");
-                
-                for (let q = 0; q < 4; q++) {
-                    lines.push((this.itemat[i]?.[q] || 0).toString());
-                    lines.push((this.itemdf[i]?.[q] || 0).toString());
-                    lines.push((this.itemmag[i]?.[q] || 0).toString());
-                    lines.push((this.itembolts[i]?.[q] || 0).toString());
-                    lines.push((this.itemgrazeamt[i]?.[q] || 0).toString());
-                    lines.push((this.itemgrazesize[i]?.[q] || 0).toString());
-                    lines.push((this.itemboltspeed[i]?.[q] || 0).toString());
-                    lines.push((this.itemspecial[i]?.[q] || 0).toString());
-                    lines.push((this.itemelement[i]?.[q] || 0).toString());
-                    lines.push((this.itemelementamount[i]?.[q] || 0).toString());
-                }
-                
-                for (let j = 0; j < 12; j++) {
-                    lines.push((this.spell[i]?.[j] || 0).toString());
-                }
-            }
-            
-            lines.push(this.boltspeed.toString());
-            lines.push(this.grazeamt.toString());
-            lines.push(this.grazesize.toString());
-            
-            for (let j = 0; j < this.item.length; j++) lines.push((this.item[j] || 0).toString());
-            for (let j = 0; j < this.keyitem.length; j++) lines.push((this.keyitem[j] || 0).toString());
-            for (let j = 0; j < this.weapon.length; j++) lines.push((this.weapon[j] || 0).toString());
-            for (let j = 0; j < this.armor.length; j++) lines.push((this.armor[j] || 0).toString());
-            for (let j = 0; j < this.pocketitem.length; j++) lines.push((this.pocketitem[j] || 0).toString());
-            
-            lines.push(this.tension.toString());
-            lines.push(this.maxtension.toString());
-            lines.push(this.lweapon.toString());
-            lines.push(this.larmor.toString());
-            lines.push(this.lxp.toString());
-            lines.push(this.llv.toString());
-            lines.push(this.lgold.toString());
-            lines.push(this.lhp.toString());
-            lines.push(this.lmaxhp.toString());
-            lines.push(this.lat.toString());
-            lines.push(this.ldf.toString());
-            lines.push(this.lwstrength.toString());
-            lines.push(this.ladef.toString());
-            
-            for (let i = 0; i < 8; i++) {
-                lines.push((this.litem[i] || 0).toString());
-                lines.push((this.phone[i] || 0).toString());
-            }
-            
-            for (let i = 0; i < flagCount; i++) {
-                lines.push((this.flag[i] || 0).toString());
-            }
-            
-            lines.push(this.plot.toString());
-            lines.push(this.currentroom.toString());
-            lines.push(this.time.toString());
+        readFromPC(lines) {
+            let line = 0;
 
-            this.new_vars.forEach(v => lines.push(v));
-            
-            return lines.join('\r\n');
-        }
-
-        _readPC(lines, flagCount) {
-             let line = 0;
-            
+            // General Info
             this.truename = lines[line++] || "";
             for (let i = 0; i < 6; i++) this.othername[i] = lines[line++] || "";
             for (let i = 0; i < 3; i++) this.char[i] = parseFloat(lines[line++]) || 0;
-            
             this.gold = parseFloat(lines[line++]) || 0;
             this.xp = parseFloat(lines[line++]) || 0;
             this.lv = parseFloat(lines[line++]) || 0;
             this.inv = parseFloat(lines[line++]) || 0;
             this.invc = parseFloat(lines[line++]) || 0;
             this.darkzone = parseFloat(lines[line++]) || 0;
+            this.new_currency = parseFloat(lines[line++]) || 0;
             
+            // Character Stat Blocks
             const charCount = 5;
             for (let i = 0; i < charCount; i++) {
-                this.hp[i] = parseFloat(lines[line++]) || 0;
-                this.maxhp[i] = parseFloat(lines[line++]) || 0;
-                this.at[i] = parseFloat(lines[line++]) || 0;
-                this.df[i] = parseFloat(lines[line++]) || 0;
-                this.mag[i] = parseFloat(lines[line++]) || 0;
-                this.guts[i] = parseFloat(lines[line++]) || 0;
-                this.charweapon[i] = parseFloat(lines[line++]) || 0;
-                this.chararmor1[i] = parseFloat(lines[line++]) || 0;
-                this.chararmor2[i] = parseFloat(lines[line++]) || 0;
-                this.weaponstyle[i] = lines[line++] || "";
+                const char = this.char_stats[i];
+                char.hp = parseFloat(lines[line++]) || 0;
+                char.maxhp = parseFloat(lines[line++]) || 0;
+                char.at = parseFloat(lines[line++]) || 0;
+                char.df = parseFloat(lines[line++]) || 0;
+                char.mag = parseFloat(lines[line++]) || 0;
+                char.guts = parseFloat(lines[line++]) || 0;
+                char.charweapon = parseFloat(lines[line++]) || 0;
+                char.chararmor1 = parseFloat(lines[line++]) || 0;
+                char.chararmor2 = parseFloat(lines[line++]) || 0;
+                char.weaponstyle = lines[line++] || "";
                 
                 for (let q = 0; q < 4; q++) {
-                    this.itemat[i][q] = parseFloat(lines[line++]) || 0;
-                    this.itemdf[i][q] = parseFloat(lines[line++]) || 0;
-                    this.itemmag[i][q] = parseFloat(lines[line++]) || 0;
-                    this.itembolts[i][q] = parseFloat(lines[line++]) || 0;
-                    this.itemgrazeamt[i][q] = parseFloat(lines[line++]) || 0;
-                    this.itemgrazesize[i][q] = parseFloat(lines[line++]) || 0;
-                    this.itemboltspeed[i][q] = parseFloat(lines[line++]) || 0;
-                    this.itemspecial[i][q] = parseFloat(lines[line++]) || 0;
-                    this.itemelement[i][q] = parseFloat(lines[line++]) || 0;
-                    this.itemelementamount[i][q] = parseFloat(lines[line++]) || 0;
+                    char.itemat[q] = parseFloat(lines[line++]) || 0;
+                    char.itemdf[q] = parseFloat(lines[line++]) || 0;
+                    char.itemmag[q] = parseFloat(lines[line++]) || 0;
+                    char.itembolts[q] = parseFloat(lines[line++]) || 0;
+                    char.itemgrazeamt[q] = parseFloat(lines[line++]) || 0;
+                    char.itemgrazesize[q] = parseFloat(lines[line++]) || 0;
+                    char.itemboltspeed[q] = parseFloat(lines[line++]) || 0;
+                    char.itemspecial[q] = parseFloat(lines[line++]) || 0;
+                    char.itemelement[q] = parseFloat(lines[line++]) || 0;
+                    char.itemelementamount[q] = parseFloat(lines[line++]) || 0;
                 }
-                
                 for (let j = 0; j < 12; j++) {
-                    this.spell[i][j] = parseFloat(lines[line++]) || 0;
+                    char.spell[j] = parseFloat(lines[line++]) || 0;
                 }
             }
-            
+
+            // ... rest of the file
             this.boltspeed = parseFloat(lines[line++]) || 0;
             this.grazeamt = parseFloat(lines[line++]) || 0;
             this.grazesize = parseFloat(lines[line++]) || 0;
-            
+
             for (let j = 0; j < this.item.length; j++) this.item[j] = parseFloat(lines[line++]) || 0;
             for (let j = 0; j < this.keyitem.length; j++) this.keyitem[j] = parseFloat(lines[line++]) || 0;
             for (let j = 0; j < this.weapon.length; j++) this.weapon[j] = parseFloat(lines[line++]) || 0;
@@ -1564,70 +1493,148 @@
             this.ldf = parseFloat(lines[line++]) || 0;
             this.lwstrength = parseFloat(lines[line++]) || 0;
             this.ladef = parseFloat(lines[line++]) || 0;
-            
+
             for (let i = 0; i < 8; i++) {
                 this.litem[i] = parseFloat(lines[line++]) || 0;
                 this.phone[i] = parseFloat(lines[line++]) || 0;
             }
-            
-            for (let i = 0; i < flagCount; i++) {
+
+            for (let i = 0; i < this.flag.length; i++) {
                 this.flag[i] = parseFloat(lines[line++]) || 0;
             }
-            
+
             this.plot = parseFloat(lines[line++]) || 0;
             this.currentroom = parseFloat(lines[line++]) || 0;
             this.time = parseFloat(lines[line++]) || 0;
-            
-            while(line < lines.length && lines[line] !== undefined) {
-                 this.new_vars.push(lines[line++]);
-            }
         }
-
-        _writeConsole() {
-             const lines = [];
+        
+        writeToPC() {
+            const lines = [];
             
+            // General Info
             lines.push(this.truename);
-            lines.push(new GMSListEncoder(this.othername).getString());
-            
-            for (let i = 0; i < 3; i++) lines.push(this.char[i].toString());
-            
+            this.othername.forEach(name => lines.push(name));
+            this.char.forEach(c => lines.push(c.toString()));
             lines.push(this.gold.toString());
             lines.push(this.xp.toString());
             lines.push(this.lv.toString());
             lines.push(this.inv.toString());
             lines.push(this.invc.toString());
             lines.push(this.darkzone.toString());
+            lines.push(this.new_currency.toString());
             
-            lines.push(new GMSListEncoder(this.hp).getString());
-            lines.push(new GMSListEncoder(this.maxhp).getString());
-            lines.push(new GMSListEncoder(this.at).getString());
-            lines.push(new GMSListEncoder(this.df).getString());
-            lines.push(new GMSListEncoder(this.mag).getString());
-            lines.push(new GMSListEncoder(this.guts).getString());
-            lines.push(new GMSListEncoder(this.charweapon).getString());
-            lines.push(new GMSListEncoder(this.chararmor1).getString());
-            lines.push(new GMSListEncoder(this.chararmor2).getString());
-            lines.push(new GMSListEncoder(this.weaponstyle).getString());
+            // Character Stat Blocks
+            this.char_stats.forEach(char => {
+                lines.push(char.hp.toString());
+                lines.push(char.maxhp.toString());
+                lines.push(char.at.toString());
+                lines.push(char.df.toString());
+                lines.push(char.mag.toString());
+                lines.push(char.guts.toString());
+                lines.push(char.charweapon.toString());
+                lines.push(char.chararmor1.toString());
+                lines.push(char.chararmor2.toString());
+                lines.push(char.weaponstyle);
+                
+                char.itemat.forEach(val => lines.push(val.toString()));
+                char.itemdf.forEach(val => lines.push(val.toString()));
+                char.itemmag.forEach(val => lines.push(val.toString()));
+                char.itembolts.forEach(val => lines.push(val.toString()));
+                char.itemgrazeamt.forEach(val => lines.push(val.toString()));
+                char.itemgrazesize.forEach(val => lines.push(val.toString()));
+                char.itemboltspeed.forEach(val => lines.push(val.toString()));
+                char.itemspecial.forEach(val => lines.push(val.toString()));
+                char.itemelement.forEach(val => lines.push(val.toString()));
+                char.itemelementamount.forEach(val => lines.push(val.toString()));
+                
+                char.spell.forEach(val => lines.push(val.toString()));
+            });
             
-            const charCount = 5;
-            for (let i = 0; i < charCount; i++) {
-                for (let q = 0; q < 4; q++) {
-                    lines.push((this.itemat[i]?.[q] || 0).toString());
-                    lines.push((this.itemdf[i]?.[q] || 0).toString());
-                    lines.push((this.itemmag[i]?.[q] || 0).toString());
-                    lines.push((this.itembolts[i]?.[q] || 0).toString());
-                    lines.push((this.itemgrazeamt[i]?.[q] || 0).toString());
-                    lines.push((this.itemgrazesize[i]?.[q] || 0).toString());
-                    lines.push((this.itemboltspeed[i]?.[q] || 0).toString());
-                    lines.push((this.itemspecial[i]?.[q] || 0).toString());
-                    lines.push((this.itemelement[i]?.[q] || 0).toString());
-                    lines.push((this.itemelementamount[i]?.[q] || 0).toString());
-                }
-                for (let j = 0; j < 12; j++) {
-                    lines.push((this.spell[i]?.[j] || 0).toString());
-                }
+            // ... rest of the file
+            lines.push(this.boltspeed.toString());
+            lines.push(this.grazeamt.toString());
+            lines.push(this.grazesize.toString());
+            
+            this.item.forEach(val => lines.push(val.toString()));
+            this.keyitem.forEach(val => lines.push(val.toString()));
+            this.weapon.forEach(val => lines.push(val.toString()));
+            this.armor.forEach(val => lines.push(val.toString()));
+            this.pocketitem.forEach(val => lines.push(val.toString()));
+            
+            lines.push(this.tension.toString());
+            lines.push(this.maxtension.toString());
+            lines.push(this.lweapon.toString());
+            lines.push(this.larmor.toString());
+            lines.push(this.lxp.toString());
+            lines.push(this.llv.toString());
+            lines.push(this.lgold.toString());
+            lines.push(this.lhp.toString());
+            lines.push(this.lmaxhp.toString());
+            lines.push(this.lat.toString());
+            lines.push(this.ldf.toString());
+            lines.push(this.lwstrength.toString());
+            lines.push(this.ladef.toString());
+            
+            for (let i = 0; i < 8; i++) {
+                lines.push(this.litem[i].toString());
+                lines.push(this.phone[i].toString());
             }
             
+            this.flag.forEach(val => lines.push(val.toString()));
+            
+            lines.push(this.plot.toString());
+            lines.push(this.currentroom.toString());
+            lines.push(this.time.toString());
+
+            this.new_vars.forEach(v => lines.push(v));
+            
+            return lines.join('\r\n');
+        }
+
+        writeToConsole() {
+            const lines = [];
+
+            // General Info
+            lines.push(this.truename);
+            lines.push(new GMSListEncoder(this.othername).getString());
+            this.char.forEach(c => lines.push(c.toString()));
+            lines.push(this.gold.toString());
+            lines.push(this.xp.toString());
+            lines.push(this.lv.toString());
+            lines.push(this.inv.toString());
+            lines.push(this.invc.toString());
+            lines.push(this.darkzone.toString());
+            lines.push(this.new_currency.toString());
+            
+            // Character Stats to GMSList
+            const charCount = 5;
+            lines.push(new GMSListEncoder(this.char_stats.map(c => c.hp)).getString());
+            lines.push(new GMSListEncoder(this.char_stats.map(c => c.maxhp)).getString());
+            lines.push(new GMSListEncoder(this.char_stats.map(c => c.at)).getString());
+            lines.push(new GMSListEncoder(this.char_stats.map(c => c.df)).getString());
+            lines.push(new GMSListEncoder(this.char_stats.map(c => c.mag)).getString());
+            lines.push(new GMSListEncoder(this.char_stats.map(c => c.guts)).getString());
+            lines.push(new GMSListEncoder(this.char_stats.map(c => c.charweapon)).getString());
+            lines.push(new GMSListEncoder(this.char_stats.map(c => c.chararmor1)).getString());
+            lines.push(new GMSListEncoder(this.char_stats.map(c => c.chararmor2)).getString());
+            lines.push(new GMSListEncoder(this.char_stats.map(c => c.weaponstyle)).getString());
+            
+            this.char_stats.forEach(char => {
+                for (let q = 0; q < 4; q++) {
+                    lines.push(char.itemat[q].toString());
+                    lines.push(char.itemdf[q].toString());
+                    lines.push(char.itemmag[q].toString());
+                    lines.push(char.itembolts[q].toString());
+                    lines.push(char.itemgrazeamt[q].toString());
+                    lines.push(char.itemgrazesize[q].toString());
+                    lines.push(char.itemboltspeed[q].toString());
+                    lines.push(char.itemspecial[q].toString());
+                    lines.push(char.itemelement[q].toString());
+                    lines.push(char.itemelementamount[q].toString());
+                }
+                char.spell.forEach(val => lines.push(val.toString()));
+            });
+
             lines.push(this.boltspeed.toString());
             lines.push(this.grazeamt.toString());
             lines.push(this.grazesize.toString());
@@ -1668,20 +1675,18 @@
     
     class DeltaruneCh3Converter extends DeltaruneCh3And4_BaseConverter {
         constructor() {
-            // CORRECCIÓN: Se ajusta el número de flags para que el total de líneas sea 3055,
-            // que es lo que espera el editor de Spamton.
-            // 675 (líneas base) + 2380 (flags) = 3055 líneas.
+            // Calculated from 3055 total lines - 675 other lines = 2380 flags
             super(2380); 
         }
-        readFromConsole(lines) { this._read(lines, 2380); }
-        writeToPC() { return this._writePC(2380); }
-        readFromPC(lines) { this._readPC(lines, 2380); }
-        writeToConsole() { return this._writeConsole(); }
+        readFromConsole(lines) { this.readFromConsole(lines, 2380); }
+        writeToPC() { return super.writeToPC(); }
+        readFromPC(lines) { super.readFromPC(lines); }
+        writeToConsole() { return super.writeToConsole(); }
     }
     
     class DeltaruneCh4Converter extends DeltaruneCh3And4_BaseConverter {
         constructor() {
-            // Se mantiene un número alto por seguridad, ya que no hay una referencia exacta.
+            // Using a safe high number for now. Can be refined if a specific line count is known.
             super(8000);
         }
         readFromConsole(lines) { this._read(lines, 8000); }
@@ -1693,7 +1698,6 @@
     // SAV Format Handler
     class SAVFormat {
         static extract(content) {
-            // Remove null bytes and other trailing junk more robustly
             const nullIndex = content.lastIndexOf('}');
             if (nullIndex !== -1) {
                 content = content.substring(0, nullIndex + 1);
@@ -2020,7 +2024,7 @@
     }
     
     // Initialize
-    log('🎮 Deltarune Save Converter Web Edition v2.1 (Ch1-4 & Spamton Editor Fix)', 'info');
+    log('🎮 Deltarune Save Converter Web Edition v2.2 (Ch3 Line Count Fix)', 'info');
     log('📌 Drag .sav or filech*_* files to begin', 'info');
     log('💡 Supports bidirectional conversion PC ↔ Console', 'info');
     </script>
